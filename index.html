@@ -415,6 +415,16 @@
       return c.available || c.comingSoon || c.pending || c.producedMonth || c.deliveredMonth;
     }).sort(function (a, b) { return b.available - a.available || b.comingSoon - a.comingSoon; });
     if (onlyAvail) colours = colours.filter(function (c) { return c.available > 0; });
+    // A search like "ntorq red" shows only the matching colours of that model
+    var words = norm($('q').value).split(' ').filter(Boolean);
+    var modelHay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type);
+    if (words.length && !words.every(function (w) { return modelHay.indexOf(w) !== -1; })) {
+      colours = colours.filter(function (c) {
+        var ci = colourInfo(c.model, c.color);
+        var hay = modelHay + ' ' + norm(ci.name + ' ' + ci.note + ' ' + c.color);
+        return words.every(function (w) { return hay.indexOf(w) !== -1; });
+      });
+    }
 
     var rows = colours.map(function (c) {
       var ci = colourInfo(c.model, c.color);
