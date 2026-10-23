@@ -15,6 +15,7 @@
     --card: #ffffff;
     --ink: #111827;
     --muted: #6b7280;
+    --faint: #c4c8cf;
     --line: #e5e7eb;
     --brand: #0b3d91;
     --brand-2: #1d5fd1;
@@ -23,7 +24,9 @@
     --green-bg: #e7f6ee;
     --amber: #b45309;
     --amber-bg: #fdf3e2;
-    --grey-bg: #f1f2f5;
+    --rose: #be123c;
+    --model-bg: #eef3fc;
+    --variant-bg: #f7f9fd;
     --radius: 18px;
     --shadow: 0 1px 2px rgba(16,24,40,.05), 0 6px 18px rgba(16,24,40,.06);
   }
@@ -34,7 +37,7 @@
     font: 15px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 48px; }
 
   /* Header */
   header {
@@ -46,30 +49,44 @@
     border-radius: 50%; background: rgba(255,255,255,.08);
   }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2px; }
-  .brand .logo {
-    background: #fff; color: var(--red); font-weight: 900; border-radius: 8px;
-    padding: 3px 8px; font-size: 14px; letter-spacing: .5px;
-  }
+  .brand .logo { background: #fff; color: var(--red); font-weight: 900; border-radius: 8px; padding: 3px 8px; font-size: 14px; letter-spacing: .5px; }
   h1 { font-size: 26px; line-height: 1.15; margin: 14px 0 6px; font-weight: 800; }
   .sub { opacity: .9; font-size: 14px; }
   .updated {
     display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
     background: rgba(255,255,255,.15); border-radius: 999px; padding: 6px 12px; font-size: 13px;
   }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.3); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.3); flex: 0 0 auto; }
 
   /* Totals */
   .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: -44px; position: relative; }
-  @media (min-width: 760px) { .tiles { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
+  .tiles .tile:last-child { grid-column: 1 / -1; }
+  @media (min-width: 900px) { .tiles { grid-template-columns: repeat(5, 1fr); gap: 14px; } .tiles .tile:last-child { grid-column: auto; } }
   .tile { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 14px 12px; }
   .tile .lbl { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
-  .tile .num { font-size: 30px; font-weight: 800; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .tile .num { font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
   .tile .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .tile.hero { background: linear-gradient(160deg, #0f9d58, #0b7a44); color: #fff; }
   .tile.hero .lbl, .tile.hero .note { color: rgba(255,255,255,.88); }
+  .tile.kits .num { color: var(--amber); }
+
+  /* "What does this mean?" markers */
+  [data-tip] { cursor: help; }
+  .lbl[data-tip], th[data-tip] .t { text-decoration: underline dotted rgba(107,114,128,.7); text-underline-offset: 3px; }
+  .tile.hero .lbl[data-tip] { text-decoration-color: rgba(255,255,255,.7); }
+  .i { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; font-size: 10px; font-weight: 800;
+    background: rgba(107,114,128,.15); color: var(--muted); margin-left: 4px; vertical-align: 1px; font-style: normal; }
+  .tile.hero .i { background: rgba(255,255,255,.25); color: #fff; }
+  #tip {
+    position: fixed; z-index: 50; max-width: 280px; background: #111827; color: #fff; font-size: 13px; line-height: 1.4;
+    padding: 9px 12px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.25); pointer-events: none;
+    opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s;
+  }
+  #tip.show { opacity: 1; transform: none; }
+  #tip b { color: #fde68a; }
 
   /* Controls */
-  .controls { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 14px 0 10px; }
+  .controls { position: sticky; top: 0; z-index: 6; background: var(--bg); padding: 14px 0 10px; }
   .search {
     width: 100%; font: inherit; font-size: 16px; padding: 13px 16px 13px 42px; border-radius: 14px;
     border: 1px solid var(--line); background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>") no-repeat 14px center;
@@ -78,81 +95,66 @@
   .search:focus { border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(29,95,209,.15); }
   .chips { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
   .chips::-webkit-scrollbar { display: none; }
-  .chip {
-    flex: 0 0 auto; border: 1px solid var(--line); background: #fff; color: var(--ink);
-    padding: 8px 14px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-  }
+  .chip { flex: 0 0 auto; border: 1px solid var(--line); background: #fff; color: var(--ink); padding: 8px 14px; border-radius: 999px;
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
   .chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
   .chip.toggle[aria-pressed="true"] { background: var(--green); border-color: var(--green); }
 
-  /* Model cards */
-  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 6px; }
-  @media (min-width: 760px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1060px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
-  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 16px 10px; }
-  .type { font-size: 11px; font-weight: 700; color: var(--brand-2); text-transform: uppercase; letter-spacing: .6px; }
-  .model { font-size: 20px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
-  .big { text-align: right; flex: 0 0 auto; }
-  .big .n { font-size: 34px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--green); }
-  .big .t { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
-  .card.none .big .n { color: #9ca3af; }
-  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
-  .badge.ok { background: var(--green-bg); color: var(--green); }
-  .badge.no { background: var(--grey-bg); color: var(--muted); }
-
-  .colours { list-style: none; margin: 0; padding: 0 8px 8px; }
-  .colour { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-top: 1px solid var(--line); }
-  .colour:first-child { border-top: 0; }
-  .sw { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.12); }
-  .cname { flex: 1; min-width: 0; }
-  .cname b { display: block; font-weight: 600; font-size: 15px; }
-  .cname small { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
-  .cnum { text-align: right; min-width: 64px; }
-  .cnum .n { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
-  .cnum .n.zero { color: #c0c4cc; }
-  .cnum .n.pos { color: var(--green); }
-  .cnum .t { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
-  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 6px; margin: 4px 4px 0 0; }
-  .tag.soon { background: var(--amber-bg); color: var(--amber); }
-  .tag.order { background: #eef2ff; color: #3949ab; }
-
-  .card-foot { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); background: #fafbfd; }
-  .card-foot div { padding: 10px 16px; }
-  .card-foot div + div { border-left: 1px solid var(--line); }
-  .card-foot .k { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
-  .card-foot .v { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .card-foot .v span { font-size: 12px; font-weight: 500; color: var(--muted); }
-  .card-note { font-size: 12px; color: var(--amber); background: var(--amber-bg); margin: 0 16px 12px; padding: 6px 10px; border-radius: 8px; }
-
-  .kitline { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .kitline b { display: inline; font-size: 12px; color: var(--amber); font-weight: 700; }
-  .card-foot.three { grid-template-columns: 1fr 1fr 1fr; }
-  .card-foot.three div { padding: 10px 12px; }
-  .big .kits { font-size: 13px; font-weight: 700; color: var(--amber); margin-top: 6px; }
-
-  /* Where the kits are */
-  .panel { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px 8px; margin-top: 12px; }
-  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
-  .panel .lbl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
-  .panel-sub { font-size: 12px; color: var(--muted); }
-  .panel-total { font-size: 26px; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; line-height: 1; }
-  .loc { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; width: 100%; padding: 9px 8px; margin: 0 -8px;
-    border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
-  .loc:hover { background: #f7f8fb; }
-  .loc[aria-pressed="true"] { background: var(--amber-bg); }
-  .loc .name { font-weight: 600; }
-  .loc .qty { font-weight: 800; font-variant-numeric: tabular-nums; }
-  .loc .bar { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: #f1f2f5; overflow: hidden; }
-  .loc .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f59e0b, #d97706); }
-  .locnote { font-size: 13px; color: var(--amber); background: var(--amber-bg); border-radius: 10px; padding: 8px 12px; margin-top: 8px; }
-  .locnote button { float: right; }
-
+  /* Table */
+  .table-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .hint { font-size: 12px; color: var(--muted); padding: 8px 14px; border-bottom: 1px solid var(--line); background: #fafbfd; }
+  @media (min-width: 1100px) { .hint .swipe { display: none; } }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 9px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; position: sticky; left: 0; z-index: 2; background: inherit; min-width: 190px; max-width: 230px; white-space: normal;
+    box-shadow: 1px 0 0 var(--line); }
+  @media (max-width: 600px) {
+    table { min-width: 820px; font-size: 13px; }
+    th, td { padding: 7px 7px; }
+    th:first-child, td:first-child { min-width: 128px; max-width: 140px; }
+    tr.variant td:first-child, tr.colour td:first-child { padding-left: 12px; }
+    tr.colour.in-variant td:first-child { padding-left: 20px; }
+    tr.model td:first-child { font-size: 14px; }
+    .cname { gap: 6px; }
+    .sw { width: 14px; height: 14px; }
+  }
+  thead th, thead th:first-child { background: #fff; }
+  thead th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .35px; vertical-align: bottom; }
+  thead tr.groups th { font-size: 10.5px; color: #4b5563; border-bottom: 0; padding-bottom: 2px; text-align: center; }
+  thead tr.groups th.g { border-bottom: 2px solid var(--line); }
+  thead tr.groups th.g-sell { color: var(--green); border-color: #bfe6cf; }
+  thead tr.groups th.g-ord { color: #3949ab; border-color: #d4daf5; }
+  thead tr.groups th.g-kits { color: var(--amber); border-color: #f5d9a8; }
+  thead tr.groups th.g-month { color: #4b5563; }
+  th.sep, td.sep { border-left: 1px solid var(--line); }
+  tbody tr { background: #fff; }
+  tr.model td { background: var(--model-bg); font-weight: 800; border-top: 2px solid #d9e3f7; }
+  tr.model td:first-child { font-size: 15px; }
+  tr.model .type { display: block; font-size: 10.5px; font-weight: 700; color: var(--brand-2); text-transform: uppercase; letter-spacing: .5px; }
+  tr.variant td { background: var(--variant-bg); font-weight: 700; color: #374151; }
+  tr.variant td:first-child { padding-left: 22px; font-size: 13.5px; }
+  tr.colour td:first-child { padding-left: 22px; }
+  tr.colour.in-variant td:first-child { padding-left: 36px; }
+  tr.colour:hover td { background: #fbfcfe; }
+  .cname { display: flex; align-items: center; gap: 9px; }
+  .sw { width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.15); }
+  .warn { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #fef3c7; color: #b45309;
+    font-size: 11px; font-weight: 900; flex: 0 0 auto; }
+  td.z { color: var(--faint); }
+  td.sell { color: var(--green); font-weight: 800; }
+  td.free { color: var(--amber); font-weight: 700; }
+  td.short { color: var(--rose); font-weight: 600; }
+  tr.model td.sell, tr.variant td.sell { color: var(--green); }
+  tfoot td { background: #111827; color: #fff; font-weight: 800; border-bottom: 0; }
+  tfoot td.z { color: #6b7280; }
   .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
-  details.help { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-top: 22px; }
+
+  details.help { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-top: 18px; }
   details.help summary { font-weight: 700; cursor: pointer; }
-  details.help ul { margin: 10px 0 0; padding-left: 18px; color: #374151; }
-  details.help li { margin: 6px 0; }
+  details.help dl { margin: 10px 0 0; }
+  details.help dt { font-weight: 700; margin-top: 10px; }
+  details.help dd { margin: 2px 0 0; color: #374151; }
   footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 22px; }
   .linkbtn { background: none; border: 0; color: var(--brand-2); font: inherit; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
 
@@ -162,10 +164,8 @@
   .gate-card { width: 100%; max-width: 360px; background: #fff; border-radius: 24px; padding: 28px 22px; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center; }
   .gate-card h2 { margin: 14px 0 4px; font-size: 22px; }
   .gate-card p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
-  .pin {
-    width: 100%; font: inherit; font-size: 28px; letter-spacing: 10px; text-align: center; font-weight: 700;
-    padding: 12px; border-radius: 14px; border: 2px solid var(--line); outline: none;
-  }
+  .pin { width: 100%; font: inherit; font-size: 28px; letter-spacing: 10px; text-align: center; font-weight: 700;
+    padding: 12px; border-radius: 14px; border: 2px solid var(--line); outline: none; }
   .pin:focus { border-color: var(--brand-2); }
   .btn { width: 100%; margin-top: 14px; font: inherit; font-weight: 700; font-size: 16px; color: #fff; background: var(--brand);
     border: 0; border-radius: 14px; padding: 14px; cursor: pointer; }
@@ -199,7 +199,7 @@
     <div class="wrap">
       <div class="brand"><span class="logo">TVS</span> Horana Assembly Plant</div>
       <h1>Stock for Sales</h1>
-      <div class="sub">What you can order now, what is in stock and where, per model and colour.</div>
+      <div class="sub">What you can order now, what is in stock and where, per model, variant and colour.</div>
       <div class="updated"><span class="dot"></span><span id="updated">Loading…</span></div>
     </div>
   </header>
@@ -210,45 +210,32 @@
       <div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div>
     </section>
 
-    <section class="panel" id="where" hidden>
-      <div class="panel-head">
-        <div><div class="lbl">Where the kits are</div><div class="panel-sub">Not assembled yet · tap a place to see its models</div></div>
-        <div class="panel-total" id="kitsTotal"></div>
-      </div>
-      <div id="locs"></div>
-    </section>
-
     <div class="controls">
-      <input class="search" id="q" type="search" placeholder="Search a model or colour… e.g. Ntorq, red" aria-label="Search">
+      <input class="search" id="q" type="search" placeholder="Search a model, variant or colour… e.g. ntorq race red" aria-label="Search">
       <div class="chips" id="chips">
         <button class="chip" data-type="all" aria-pressed="true">All</button>
         <button class="chip" data-type="Scooter" aria-pressed="false">Scooters</button>
         <button class="chip" data-type="Motorcycle" aria-pressed="false">Motorcycles</button>
         <button class="chip" data-type="Electric" aria-pressed="false">Electric</button>
         <button class="chip" data-type="Three-wheeler" aria-pressed="false">Three-wheelers</button>
-        <button class="chip toggle" id="onlyAvail" aria-pressed="false">✓ Only available</button>
+        <button class="chip toggle" id="onlyAvail" aria-pressed="false">✓ Can sell now</button>
       </div>
     </div>
 
-    <section class="grid" id="grid">
-      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    <section class="table-card">
+      <div class="hint">Hover over or tap any heading <i class="i">i</i> to see what it means. <span class="swipe">Swipe the table sideways to see all columns.</span></div>
+      <div class="scroll" id="tableWrap"><div class="skeleton" style="margin:14px"></div></div>
     </section>
 
-    <details class="help">
+    <details class="help" id="help">
       <summary>What do the numbers mean?</summary>
-      <ul>
-        <li><b>Ready</b> – built vehicles at the plant that are free for new orders. This is the number to order against.</li>
-        <li><b>Free to order</b> (three-wheelers) – three-wheelers not promised to any order. They are kept as kits and assembled when ordered.</li>
-        <li><b>Kits</b> – vehicles not assembled yet, and where they are: Plant warehouse, 180/C warehouse, Yard, or Main plant. They become “ready” after assembly.</li>
-        <li><b>On order</b> – dealer orders already waiting for this colour (they take stock first).</li>
-        <li><b>Total stock</b> – everything at the plant: built vehicles (free + already promised) and kits.</li>
-        <li><b>Produced / Delivered</b> – vehicles built and sent out, for the latest day and for this month.</li>
-        <li>Built stock comes from the plant’s evening Stock &amp; Delivery report and kits from the Stores vehicle stock report. Both change once a day.</li>
-      </ul>
+      <dl id="glossary"></dl>
     </details>
     <footer>TVS Lanka · Horana Assembly Plant · <button class="linkbtn" id="logout">Lock this phone</button></footer>
   </main>
 </div>
+
+<div id="tip" role="tooltip"></div>
 
 <script>
 (function () {
@@ -257,47 +244,71 @@
   var PIN_KEY = 'tvsSalesPin';
   var DEMO = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]demo\b/.test(location.search);
 
-  // ---- Friendly names and colours. Keys are the names used in the plant's
-  // Stock & Delivery report (upper case). Anything missing falls back to the
-  // report's own wording and a colour guessed from the name.
+  // ---- What every figure means (used for the hover/tap tips and the glossary)
+  var TIPS = {
+    sell:    ['Ready to sell', 'Built vehicles at the plant that are <b>not promised to any order</b>. You can sell these today. (Plant Stock &amp; Delivery report: “Balanced Stock for New Orders – assembled”.)'],
+    free:    ['Free kits', 'Vehicles <b>not assembled yet</b> and <b>not promised to any order</b>. You can order them; the plant assembles them first. Three-wheelers are always kept this way. (“Balanced Stock – not assembled”.)'],
+    pending: ['Orders pending', 'Dealer orders <b>waiting for delivery</b> for this colour. These are served before any new order.'],
+    short:   ['No built stock', 'Ordered quantity the plant has <b>no built vehicle</b> for (“Stock N/A for delivery orders”). It is served from kits after assembly, or from the next shipment if there are no kits. It can be higher than “Pending” because it also counts new orders not yet scheduled for delivery.'],
+    kits:    ['Kits total', 'All vehicles in the plant that are <b>not assembled yet</b>, free or already promised, from the Stores vehicle stock report.'],
+    made:    ['Made', 'Vehicles <b>produced</b> this month (production executive’s daily sheet).'],
+    deliv:   ['Delivered', 'Vehicles <b>sent out</b> to dealers this month. Days with no delivery report are not counted.'],
+    total:   ['Total stock', 'Everything at the plant: <b>built</b> vehicles (free + already promised to orders) plus <b>kits</b> not yet assembled.'],
+    warn:    ['⚠ Reports differ', 'The Stores report and the Stock &amp; Delivery report <b>do not agree</b> for this colour. Treat the free figures with care and check with the plant.']
+  };
+  var LOC_TIPS = {
+    'Plant WH':    ['Plant WH', 'Kits in the <b>plant warehouse</b> at Horana.'],
+    '180/C WH':    ['180/C', 'Kits in the <b>180/C warehouse</b>.'],
+    'Yard':        ['Yard', 'Kits (containers) in the <b>yard</b>.'],
+    'Main Plant':  ['Main plant', 'Three-wheeler kits at the <b>main plant</b> (the stores report does not give a warehouse for them).'],
+    'Munagama WH': ['Munagama', 'Kits in the <b>Munagama warehouse</b>.']
+  };
+  var LOC_ORDER = ['Plant WH', '180/C WH', 'Yard', 'Main Plant', 'Munagama WH'];
+
+  // ---- Friendly names. Keys are the names in the plant's Stock & Delivery report
+  // (upper case). Anything missing still shows, with the report's own wording.
   var MODELS = {
     'NTORQ':              { name: 'NTORQ 125', type: 'Scooter', order: 1 },
-    'NTORQ 150':          { name: 'NTORQ 150', type: 'Scooter', order: 1.5 },
-    'JUPITER':            { name: 'Jupiter 110', type: 'Scooter', order: 2 },
-    'XL 100 ITOUCH':      { name: 'XL100 iTouch', type: 'Motorcycle', order: 3 },
-    'SPORTELS 110':       { name: 'Sport ELS 110', type: 'Motorcycle', order: 4 },
-    'RAIDER 125':         { name: 'Raider 125', type: 'Motorcycle', order: 5 },
-    'RTR 160':            { name: 'Apache RTR 160 4V', type: 'Motorcycle', order: 6 },
-    'RTR 200':            { name: 'Apache RTR 200 4V', type: 'Motorcycle', order: 7 },
-    'RTR 310':            { name: 'Apache RTR 310', type: 'Motorcycle', order: 8 },
-    'RR 310':             { name: 'Apache RR 310', type: 'Motorcycle', order: 9 },
-    'RONIN':              { name: 'Ronin 225', type: 'Motorcycle', order: 10 },
-    'IQUBE ELECTRIC 2.2': { name: 'iQube 2.2 kWh', type: 'Electric', order: 11 },
-    'IQUBE ELECTRIC 3.4': { name: 'iQube S 3.4 kWh', type: 'Electric', order: 12 },
-    'ORBITER':            { name: 'Orbiter V2', type: 'Electric', order: 13 },
-    '3 WHEEL':            { name: 'TVS King Deluxe', type: 'Three-wheeler', order: 14 },
-    '3W EV':              { name: 'TVS King EV', type: 'Three-wheeler', order: 15 }
+    'NTORQ 150':          { name: 'NTORQ 150', type: 'Scooter', order: 2 },
+    'JUPITER':            { name: 'Jupiter 110', type: 'Scooter', order: 3 },
+    'XL 100 ITOUCH':      { name: 'XL100 iTouch', type: 'Motorcycle', order: 4 },
+    'SPORTELS 110':       { name: 'Sport ELS 110', type: 'Motorcycle', order: 5 },
+    'RAIDER 125':         { name: 'Raider 125', type: 'Motorcycle', order: 6 },
+    'RTR 160':            { name: 'Apache RTR 160 4V', type: 'Motorcycle', order: 7 },
+    'RTR 200':            { name: 'Apache RTR 200 4V', type: 'Motorcycle', order: 8 },
+    'RTR 310':            { name: 'Apache RTR 310', type: 'Motorcycle', order: 9 },
+    'RR 310':             { name: 'Apache RR 310', type: 'Motorcycle', order: 10 },
+    'RONIN':              { name: 'Ronin 225', type: 'Motorcycle', order: 11 },
+    'IQUBE ELECTRIC 2.2': { name: 'iQube 2.2 kWh', type: 'Electric', order: 12 },
+    'IQUBE ELECTRIC 3.4': { name: 'iQube S 3.4 kWh', type: 'Electric', order: 13 },
+    'ORBITER':            { name: 'Orbiter V2', type: 'Electric', order: 14 },
+    '3 WHEEL':            { name: 'TVS King Deluxe', type: 'Three-wheeler', order: 15 },
+    '3W EV':              { name: 'TVS King EV', type: 'Three-wheeler', order: 16 }
   };
+  // "MODEL|COLOUR" -> [colour name, variant ('' = none), swatch]
   var COLOURS = {
-    'NTORQ|RED/ BLACK FI':  ['Racing Red', 'Race Edition · FI', 'linear-gradient(135deg,#c8102e 55%,#111 55%)'],
-    'NTORQ|M BLUE FI':      ['Marine Blue', 'Race Edition · FI', 'linear-gradient(135deg,#1f4e9c 55%,#111 55%)'],
+    'NTORQ|RED/ BLACK FI':  ['Racing Red / Black', 'Race Edition FI', 'linear-gradient(135deg,#c8102e 55%,#111 55%)'],
+    'NTORQ|M BLUE FI':      ['Marine Blue', 'Race Edition FI', 'linear-gradient(135deg,#1f4e9c 55%,#111 55%)'],
     'NTORQ|RED/ BLACK RE':  ['Red / Black', 'Race Edition', 'linear-gradient(135deg,#c8102e 55%,#111 55%)'],
-    'NTORQ|DISC/CARB RED':  ['Racing Red', 'Disc · Carburettor', '#c8102e'],
-    'NTORQ|DRUM GREY':      ['Nardo Grey', 'Drum brake', '#8a8d8f'],
-    'NTORQ|DRUM BLUE':      ['Harlequin Blue', 'Drum brake', '#2c6fd1'],
-    'NTORQ|DISC FI GREY':   ['Nardo Grey', 'Disc · FI', '#8a8d8f'],
-    'NTORQ|DISC FI BLUE':   ['Harlequin Blue', 'Disc · FI', '#2c6fd1'],
-    'NTORQ|XP RED':         ['Red', 'XP edition', '#c8102e'],
-    'NTORQ|XP BLK':         ['Black', 'XP edition', '#1a1a1a'],
-    'NTORQ|XP BLUE':        ['Denim Blue', 'XP edition', '#3b5b8c'],
+    'NTORQ|DISC FI GREY':   ['Nardo Grey', 'Disc FI', '#8a8d8f'],
+    'NTORQ|DISC FI BLUE':   ['Harlequin Blue', 'Disc FI', '#2c6fd1'],
+    'NTORQ|DISC/CARB RED':  ['Racing Red', 'Disc (carburettor)', '#c8102e'],
+    'NTORQ|DRUM GREY':      ['Nardo Grey', 'Drum', '#8a8d8f'],
+    'NTORQ|DRUM BLUE':      ['Harlequin Blue', 'Drum', '#2c6fd1'],
+    'NTORQ|XP RED':         ['Red', 'XP', '#c8102e'],
+    'NTORQ|XP BLK':         ['Black', 'XP', '#1a1a1a'],
+    'NTORQ|XP BLUE':        ['Denim Blue', 'XP', '#3b5b8c'],
     'NTORQ 150|RED':        ['Red', '', '#c8102e'],
     'NTORQ 150|BLUE':       ['Blue', '', '#2c6fd1'],
     'NTORQ 150|SILVER':     ['Silver', '', 'linear-gradient(135deg,#e6e8eb,#a9adb3)'],
-    'JUPITER|COPPER':       ['Galactic Copper', 'Matte', '#a0603b'],
-    'JUPITER|DAWN BLUE':    ['Dawn Blue', 'Matte', '#4a6fa5'],
+    'JUPITER|COPPER':       ['Galactic Copper (matte)', '', '#a0603b'],
+    'JUPITER|DAWN BLUE':    ['Dawn Blue (matte)', '', '#4a6fa5'],
     'XL 100 ITOUCH|GREEN':  ['Green', '', '#3a8f5c'],
+    'XL 100 ITOUCH|BLACK':  ['Black', '', '#1a1a1a'],
     'SPORTELS 110|BLK':     ['Black', '', '#1a1a1a'],
     'SPORTELS 110|GREY':    ['Grey', '', '#8a8d8f'],
+    'RAIDER 125|BLACK':     ['Black', '', '#1a1a1a'],
+    'RAIDER 125|BLUE':      ['Blue', '', '#2c6fd1'],
     'RTR 160|BLK':          ['Matte Black', '', '#1f1f1f'],
     'RTR 160|GREY':         ['Granite Grey', '', '#6b6e70'],
     'RTR 160|BLUE':         ['Marine Blue', '', '#1f4e9c'],
@@ -310,10 +321,12 @@
     'RTR 310|YELLOW':       ['Black / Yellow', '', 'linear-gradient(135deg,#111 55%,#f5c518 55%)'],
     'RR 310|RED':           ['Racing Red', '', '#c8102e'],
     'RR 310|GREY':          ['Bomber Grey', '', '#5f6366'],
+    'RR 310|BLUE':          ['Blue', '', '#1b5fbf'],
     'RONIN|BLUE':           ['Midnight Blue', '', '#1c2b4a'],
     'RONIN|GREY':           ['Nimbus Grey', '', '#9a9ea3'],
     'IQUBE ELECTRIC 2.2|P WHITE': ['Pearl White', '', '#f4f4f0'],
     'IQUBE ELECTRIC 2.2|T GREY':  ['Titanium Grey', '', '#7d8186'],
+    'IQUBE ELECTRIC 2.2|BROWN':   ['Brown', '', '#7a5236'],
     'IQUBE ELECTRIC 3.4|P WHITE': ['Pearl White', '', '#f4f4f0'],
     'IQUBE ELECTRIC 3.4|T GREY':  ['Titanium Grey', '', '#7d8186'],
     'IQUBE ELECTRIC 3.4|MERCURY GREY':   ['Mercury Grey', '', '#9ea3a8'],
@@ -324,6 +337,7 @@
     'ORBITER|MARTIN COPPER':    ['Martian Copper', '', '#b5653a'],
     'ORBITER|COSMIC TITAMIUM':  ['Cosmic Titanium', '', '#8c8f94']
   };
+  var VARIANT_ORDER = ['Race Edition FI', 'Race Edition', 'Disc FI', 'Disc (carburettor)', 'Drum', 'XP'];
   var GUESS = [
     [/YELLOW/, '#f5c518'], [/GREEN/, '#3a8f5c'], [/COPPER|BROWN/, '#8b5a3c'], [/WHITE/, '#f4f4f0'],
     [/RED/, '#c8102e'], [/BLUE/, '#2c6fd1'], [/GR[AE]Y|SILVER|TITAN/, '#8a8d8f'], [/BLK|BLACK/, '#1a1a1a']
@@ -335,27 +349,28 @@
   }
   function colourInfo(m, c) {
     var hit = COLOURS[norm(m) + '|' + norm(c)];
-    if (hit) return { name: hit[0], note: hit[1], sw: hit[2] };
+    if (hit) return { name: hit[0], variant: hit[1], sw: hit[2] };
     var sw = '#c9ccd1';
     for (var i = 0; i < GUESS.length; i++) if (GUESS[i][0].test(norm(c))) { sw = GUESS[i][1]; break; }
-    return { name: titleCase(c), note: '', sw: sw };
+    return { name: titleCase(c), variant: '', sw: sw };
   }
   function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
-  function dayLabel(key) {
-    if (!key) return '';
-    var d = new Date(key + 'T00:00:00');
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  }
-  function monthLabel(key) {
-    if (!key) return 'this month';
-    return new Date(key + 'T00:00:00').toLocaleDateString('en-GB', { month: 'long' });
+  function dayLabel(key) { return key ? new Date(key + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; }
+  function monthLabel(key) { return key ? new Date(key + 'T00:00:00').toLocaleDateString('en-GB', { month: 'long' }) : 'this month'; }
+  function when(iso, key) {
+    if (!iso) return dayLabel(key);
+    return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo' });
   }
   function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function tipAttr(key, extra) {
+    var t = TIPS[key] || LOC_TIPS[key];
+    return ' data-tip="' + esc('<b>' + t[0] + '</b><br>' + t[1] + (extra ? '<br>' + extra : '')) + '" tabindex="0"';
+  }
 
   var $ = function (id) { return document.getElementById(id); };
-  var data = null, filterType = 'all', onlyAvail = false, filterLoc = null;
+  var data = null, filterType = 'all', onlyAvail = false;
 
   // ---- PIN + loading
   function showGate(msg) {
@@ -395,172 +410,177 @@
   });
   $('logout').addEventListener('click', function () { store(PIN_KEY, null); $('pin').value = ''; showGate(''); });
 
-  // ---- Rendering
-  // Kit locations as the Stores report names them -> [long name, short name]
-  var LOCS = {
-    'Plant WH': ['Plant warehouse', 'Plant WH'],
-    '180/C WH': ['180/C warehouse', '180/C'],
-    'Yard': ['Yard', 'Yard'],
-    'Main Plant': ['Main plant (3W kits)', 'Main plant'],
-    'Munagama WH': ['Munagama warehouse', 'Munagama']
-  };
-  function locName(l, short) { return LOCS[l] ? LOCS[l][short ? 1 : 0] : l; }
-  // What sales can order now: built + free (2W), or free kits (3W, assembled on order)
-  function sell(it) { return (it.available || 0) + (it.freeKits || 0); }
-  function when(iso, key) {
-    if (!iso) return dayLabel(key);
-    return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo' });
-  }
-
+  // ---- Tiles + glossary
   function render() {
     var t = data.totals;
     $('updated').textContent = 'Built stock: ' + when(data.stockReceivedAt, data.stockReportDate) +
       ' · Kits: ' + when(data.storesReceivedAt, data.storesReportDate);
-
+    var mon = monthLabel(data.producedDay);
     $('tiles').innerHTML =
-      tile('hero', 'Ready to sell', t.available, t.freeKits
-        ? 'built & free · + ' + fmt(t.freeKits) + ' three-wheelers to order'
-        : 'built & free for new orders') +
-      tile('', 'Total stock', t.totalStock, fmt(t.inPlant) + ' built + ' + fmt(t.kits) + ' kits') +
-      tile('', 'Produced', t.producedMonth, 'in ' + monthLabel(data.producedDay) + ' · ' + dayLabel(data.producedDay) + ': ' + fmt(t.producedDay)) +
-      tile('', 'Delivered', t.deliveredMonth, 'in ' + monthLabel(data.deliveredDay) + ' · ' + dayLabel(data.deliveredDay) + ': ' + fmt(t.deliveredDay));
-    drawLocations();
-    drawCards();
+      tile('hero', 'sell', 'Ready to sell', t.available, 'built and free today') +
+      tile('kits', 'free', 'Free kits', t.freeKits, 'free to order, assembled first') +
+      tile('', 'total', 'Total stock', t.totalStock, fmt(t.inPlant) + ' built + ' + fmt(t.kits) + ' kits') +
+      tile('', 'made', 'Made in ' + mon, t.producedMonth, dayLabel(data.producedDay) + ': ' + fmt(t.producedDay)) +
+      tile('', 'deliv', 'Delivered in ' + monthLabel(data.deliveredDay), t.deliveredMonth, dayLabel(data.deliveredDay) + ': ' + fmt(t.deliveredDay));
+
+    var gl = ['sell', 'free', 'pending', 'short', 'kits'].map(function (k) { return TIPS[k]; });
+    locsInData().forEach(function (l) { gl.push(LOC_TIPS[l] || [l, 'Kits stored at ' + l + '.']); });
+    gl.push(TIPS.made, TIPS.deliv, TIPS.total, TIPS.warn);
+    gl.push(['Where the figures come from', 'Ready, free kits and orders: the plant’s evening Stock &amp; Delivery report. Kits and their location: the Stores vehicle stock report. Made: the production executive’s daily sheet. Each updates once a day; the times are at the top of the page.']);
+    $('glossary').innerHTML = gl.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; }).join('');
+    drawTable();
   }
-  function tile(cls, lbl, n, note) {
-    return '<div class="tile ' + cls + '"><div class="lbl">' + esc(lbl) + '</div><div class="num">' + fmt(n) +
+  function tile(cls, tipKey, lbl, n, note) {
+    return '<div class="tile ' + cls + '"><div class="lbl"' + tipAttr(tipKey) + '>' + esc(lbl) + '<i class="i">i</i></div><div class="num">' + fmt(n) +
       '</div><div class="note">' + esc(note) + '</div></div>';
   }
-
-  function drawLocations() {
-    var locs = data.kitsByLocation || {};
-    var names = Object.keys(locs).sort(function (a, b) { return locs[b] - locs[a]; });
-    if (!names.length) { $('where').hidden = true; return; }
-    var max = locs[names[0]] || 1;
-    $('where').hidden = false;
-    $('kitsTotal').textContent = fmt(data.totals.kits);
-    $('locs').innerHTML = names.map(function (l) {
-      return '<button class="loc" data-loc="' + esc(l) + '" aria-pressed="' + (filterLoc === l) + '">' +
-        '<span class="name">' + esc(locName(l)) + '</span><span class="qty">' + fmt(locs[l]) + '</span>' +
-        '<span class="bar"><i style="width:' + Math.max(2, Math.round(locs[l] / max * 100)) + '%"></i></span></button>';
-    }).join('');
-    Array.prototype.forEach.call(document.querySelectorAll('.loc'), function (b) {
-      b.addEventListener('click', function () {
-        var l = b.getAttribute('data-loc');
-        filterLoc = (filterLoc === l) ? null : l;
-        drawLocations();
-        drawCards();
-        if (filterLoc) $('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
+  function locsInData() {
+    var have = data.kitsByLocation || {};
+    var list = LOC_ORDER.filter(function (l) { return have[l]; });
+    Object.keys(have).forEach(function (l) { if (list.indexOf(l) === -1 && have[l]) list.push(l); });
+    return list;
   }
 
-  function groupModels() {
-    var groups = {};
-    data.items.forEach(function (it) {
-      var k = norm(it.model);
-      if (!groups[k]) groups[k] = { key: k, info: modelInfo(it.model), is3W: it.category === '3W', colours: [], sell: 0, kits: 0, locKits: 0, pending: 0, producedMonth: 0, deliveredMonth: 0 };
-      var g = groups[k];
-      g.colours.push(it);
-      g.sell += sell(it);
-      g.locKits += filterLoc ? ((it.kitsByLocation || {})[filterLoc] || 0) : 0;
-      ['kits', 'pending', 'producedMonth', 'deliveredMonth'].forEach(function (f) { g[f] += it[f] || 0; });
-    });
-    return Object.keys(groups).map(function (k) { return groups[k]; });
-  }
+  // ---- Table
+  function canSell(it) { return (it.available || 0) + (it.freeKits || 0) > 0; }
+  function active(it) { return it.available || it.freeKits || it.pending || it.noStock || it.kits || it.producedMonth || it.deliveredMonth; }
 
-  function drawCards() {
-    var q = norm($('q').value);
-    var list = groupModels().filter(function (g) {
-      if (filterType !== 'all' && g.info.type !== filterType) return false;
-      if (onlyAvail && !g.sell) return false;
-      if (filterLoc && !g.locKits) return false;
-      // Hide models with nothing at all going on (no stock, kits, orders or movement this month)
-      if (!g.sell && !g.kits && !g.pending && !g.producedMonth && !g.deliveredMonth) return false;
-      if (!q) return true;
-      var hay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type + ' ' + g.colours.map(function (c) {
-        var ci = colourInfo(c.model, c.color); return ci.name + ' ' + ci.note + ' ' + c.color;
-      }).join(' '));
-      return q.split(' ').every(function (w) { return hay.indexOf(w) !== -1; });
-    });
-    list.sort(function (a, b) {
-      if (filterLoc) return b.locKits - a.locKits;
-      return (b.sell > 0) - (a.sell > 0) || a.info.order - b.info.order;
-    });
-
-    var note = filterLoc
-      ? '<div class="locnote" style="grid-column:1/-1">Showing kits in <b>' + esc(locName(filterLoc)) + '</b> <button class="linkbtn" id="clearLoc">Show all</button></div>'
-      : '';
-    if (!list.length) $('grid').innerHTML = note + '<div class="empty">Nothing matches. Try another word, or tap “All”.</div>';
-    else $('grid').innerHTML = note + list.map(card).join('');
-    if ($('clearLoc')) $('clearLoc').addEventListener('click', function () { filterLoc = null; drawLocations(); drawCards(); });
-  }
-
-  function kitLine(c) {
-    var byLoc = c.kitsByLocation || {};
-    var locs = Object.keys(byLoc).filter(function (l) { return byLoc[l] && (!filterLoc || l === filterLoc); })
-      .sort(function (a, b) { return byLoc[b] - byLoc[a]; });
-    if (!locs.length) return '';
-    var n = filterLoc ? byLoc[filterLoc] : c.kits;
-    return '<span class="kitline"><b>' + fmt(n) + ' kits</b> · ' +
-      locs.map(function (l) { return esc(locName(l, true)) + ' ' + fmt(byLoc[l]); }).join(' · ') + '</span>';
-  }
-
-  function card(g) {
-    var colours = g.colours.slice().filter(function (c) {
-      return sell(c) || c.kits || c.pending || c.producedMonth || c.deliveredMonth;
-    }).sort(function (a, b) { return sell(b) - sell(a) || (b.kits || 0) - (a.kits || 0); });
-    if (onlyAvail) colours = colours.filter(function (c) { return sell(c) > 0; });
-    if (filterLoc) colours = colours.filter(function (c) { return (c.kitsByLocation || {})[filterLoc] > 0; });
-    // A search like "ntorq red" shows only the matching colours of that model
+  function rowsToShow() {
     var words = norm($('q').value).split(' ').filter(Boolean);
-    var modelHay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type);
-    if (words.length && !words.every(function (w) { return modelHay.indexOf(w) !== -1; })) {
-      colours = colours.filter(function (c) {
-        var ci = colourInfo(c.model, c.color);
-        var hay = modelHay + ' ' + norm(ci.name + ' ' + ci.note + ' ' + c.color);
-        return words.every(function (w) { return hay.indexOf(w) !== -1; });
-      });
+    var models = {};
+    data.items.forEach(function (it) {
+      if (!active(it)) return;
+      if (onlyAvail && !canSell(it)) return;
+      var mi = modelInfo(it.model);
+      if (filterType !== 'all' && mi.type !== filterType) return;
+      var ci = colourInfo(it.model, it.color);
+      var hay = norm(mi.name + ' ' + it.model + ' ' + mi.type + ' ' + ci.variant + ' ' + ci.name + ' ' + it.color);
+      if (!words.every(function (w) { return hay.indexOf(w) !== -1; })) return;
+      var k = norm(it.model);
+      if (!models[k]) models[k] = { info: mi, variants: {}, rows: [] };
+      var row = { it: it, ci: ci };
+      if (ci.variant) (models[k].variants[ci.variant] = models[k].variants[ci.variant] || []).push(row);
+      else models[k].rows.push(row);
+    });
+    return Object.keys(models).map(function (k) { return models[k]; })
+      .sort(function (a, b) { return a.info.order - b.info.order || (a.info.name < b.info.name ? -1 : 1); });
+  }
+
+  function sum(rows) {
+    var s = { available: 0, freeKits: 0, pending: 0, noStock: 0, kits: 0, producedMonth: 0, deliveredMonth: 0, loc: {} };
+    rows.forEach(function (r) {
+      ['available', 'freeKits', 'pending', 'noStock', 'kits', 'producedMonth', 'deliveredMonth'].forEach(function (f) { s[f] += r.it[f] || 0; });
+      var bl = r.it.kitsByLocation || {};
+      Object.keys(bl).forEach(function (l) { s.loc[l] = (s.loc[l] || 0) + bl[l]; });
+    });
+    return s;
+  }
+  function byKitsDesc(a, b) { return (b.it.available + b.it.freeKits) - (a.it.available + a.it.freeKits) || b.it.kits - a.it.kits; }
+
+  function cells(s, locs) {
+    function c(v, cls) { return '<td class="' + (v ? cls : 'z') + '">' + (v ? fmt(v) : '–') + '</td>'; }
+    return c(s.available, 'sell') + c(s.freeKits, 'free') +
+      '<td class="sep ' + (s.pending ? '' : 'z') + '">' + (s.pending ? fmt(s.pending) : '–') + '</td>' + c(s.noStock, 'short') +
+      '<td class="sep ' + (s.kits ? '' : 'z') + '"><b>' + (s.kits ? fmt(s.kits) : '–') + '</b></td>' +
+      locs.map(function (l) { return c(s.loc[l] || 0, ''); }).join('') +
+      '<td class="sep ' + (s.producedMonth ? '' : 'z') + '">' + (s.producedMonth ? fmt(s.producedMonth) : '–') + '</td>' + c(s.deliveredMonth, '');
+  }
+  function colourRow(r, inVariant, locs) {
+    var it = r.it;
+    var s = sum([r]);
+    var warn = it.check ? '<span class="warn"' + tipAttr('warn', esc(it.check)) + '>!</span>' : '';
+    return '<tr class="colour' + (inVariant ? ' in-variant' : '') + '"><td><span class="cname"><span class="sw" style="background:' + r.ci.sw + '"></span>' +
+      esc(r.ci.name) + warn + '</span></td>' + cells(s, locs) + '</tr>';
+  }
+
+  function drawTable() {
+    var locs = locsInData();
+    var models = rowsToShow();
+    var mon = monthLabel(data.producedDay).slice(0, 3);
+    var head =
+      '<thead><tr class="groups"><th></th>' +
+      '<th class="g g-sell" colspan="2">Can sell now</th>' +
+      '<th class="g g-ord sep" colspan="2">Dealer orders</th>' +
+      '<th class="g g-kits sep" colspan="' + (1 + locs.length) + '">Kits in stock (not assembled) – where they are</th>' +
+      '<th class="g g-month sep" colspan="2">This month</th></tr>' +
+      '<tr><th>Model / colour</th>' +
+      th('sell', 'Ready to sell') + th('free', 'Free kits') +
+      th('pending', 'Pending', 'sep') + th('short', 'No built stock') +
+      th('kits', 'Total', 'sep') + locs.map(function (l) { return th(l, LOC_TIPS[l] ? LOC_TIPS[l][0] : l); }).join('') +
+      th('made', 'Made ' + mon, 'sep') + th('deliv', 'Delivered ' + monthLabel(data.deliveredDay).slice(0, 3)) +
+      '</tr></thead>';
+
+    if (!models.length) {
+      $('tableWrap').innerHTML = '<div class="empty">Nothing matches. Try another word, or tap “All”.</div>';
+      bindTips();
+      return;
     }
 
-    var rows = colours.map(function (c) {
-      var ci = colourInfo(c.model, c.color);
-      var n = sell(c);
-      return '<li class="colour"><span class="sw" style="background:' + ci.sw + '"></span>' +
-        '<div class="cname"><b>' + esc(ci.name) + '</b>' + (ci.note ? '<small>' + esc(ci.note) + '</small>' : '') +
-        kitLine(c) + (c.pending ? '<span class="tag order">' + fmt(c.pending) + ' on order</span>' : '') + '</div>' +
-        '<div class="cnum"><div class="n ' + (n ? 'pos' : 'zero') + '">' + fmt(n) + '</div><div class="t">' + (g.is3W ? 'free' : 'ready') + '</div></div></li>';
-    }).join('');
-
-    var badge = g.sell
-      ? '<span class="badge ok">Available</span>'
-      : (g.kits ? '<span class="badge no">Kits in stock</span>' : '<span class="badge no">Out of stock</span>');
-
-    return '<article class="card' + (g.sell ? '' : ' none') + '">' +
-      '<div class="card-top"><div><div class="type">' + esc(g.info.type) + '</div><div class="model">' + esc(g.info.name) + '</div>' + badge + '</div>' +
-      '<div class="big"><div class="n">' + fmt(g.sell) + '</div><div class="t">' + (g.is3W ? 'free to order' : 'ready to sell') + '</div>' +
-      (g.kits ? '<div class="kits">+ ' + fmt(g.kits) + ' kits</div>' : '') + '</div></div>' +
-      (g.is3W ? '<div class="card-note">Three-wheelers are kept as kits and assembled when ordered.</div>' : '') +
-      '<ul class="colours">' + rows + '</ul>' +
-      '<div class="card-foot three"><div><div class="k">Kits</div><div class="v">' + fmt(g.kits) + '</div></div>' +
-      '<div><div class="k">Made · ' + esc(monthLabel(data.producedDay).slice(0, 3)) + '</div><div class="v">' + fmt(g.producedMonth) + '</div></div>' +
-      '<div><div class="k">Delivered · ' + esc(monthLabel(data.deliveredDay).slice(0, 3)) + '</div><div class="v">' + fmt(g.deliveredMonth) + '</div></div></div>' +
-      '</article>';
+    var body = '', all = [];
+    models.forEach(function (m) {
+      var vNames = Object.keys(m.variants).sort(function (a, b) {
+        var ia = VARIANT_ORDER.indexOf(a), ib = VARIANT_ORDER.indexOf(b);
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+      });
+      var modelRows = m.rows.slice();
+      vNames.forEach(function (v) { modelRows = modelRows.concat(m.variants[v]); });
+      all = all.concat(modelRows);
+      body += '<tr class="model"><td><span class="type">' + esc(m.info.type) + '</span>' + esc(m.info.name) + '</td>' + cells(sum(modelRows), locs) + '</tr>';
+      vNames.forEach(function (v) {
+        var vr = m.variants[v].sort(byKitsDesc);
+        body += '<tr class="variant"><td>' + esc(v) + '</td>' + cells(sum(vr), locs) + '</tr>';
+        vr.forEach(function (r) { body += colourRow(r, true, locs); });
+      });
+      m.rows.sort(byKitsDesc).forEach(function (r) { body += colourRow(r, false, locs); });
+    });
+    var foot = '<tfoot><tr><td>Total' + (all.length < data.items.filter(active).length ? ' (shown)' : '') + '</td>' + cells(sum(all), locs) + '</tr></tfoot>';
+    $('tableWrap').innerHTML = '<table>' + head + '<tbody>' + body + '</tbody>' + foot + '</table>';
+    bindTips();
+  }
+  function th(key, label, cls) {
+    return '<th class="' + (cls || '') + '"' + tipAttr(key) + '><span class="t">' + esc(label) + '</span><i class="i">i</i></th>';
   }
 
+  // ---- Tooltips: hover on a computer, tap on a phone
+  var tipEl = $('tip'), tipFor = null;
+  function showTip(el) {
+    tipFor = el;
+    tipEl.innerHTML = el.getAttribute('data-tip');
+    tipEl.classList.add('show');
+    var r = el.getBoundingClientRect(), tw = tipEl.offsetWidth, thh = tipEl.offsetHeight;
+    var left = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 8);
+    var top = r.bottom + 8;
+    if (top + thh > window.innerHeight - 8) top = Math.max(8, r.top - thh - 8);
+    tipEl.style.left = left + 'px'; tipEl.style.top = top + 'px';
+  }
+  function hideTip() { tipFor = null; tipEl.classList.remove('show'); }
+  function bindTips() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-tip]'), function (el) {
+      if (el._tip) return;
+      el._tip = true;
+      el.addEventListener('mouseenter', function () { showTip(el); });
+      el.addEventListener('mouseleave', hideTip);
+      el.addEventListener('focus', function () { showTip(el); });
+      el.addEventListener('blur', hideTip);
+      el.addEventListener('click', function (e) { e.stopPropagation(); if (tipFor === el) hideTip(); else showTip(el); });
+    });
+  }
+  document.addEventListener('click', hideTip);
+  window.addEventListener('scroll', hideTip, true);
+
   // ---- Controls
-  $('q').addEventListener('input', function () { if (data) drawCards(); });
+  $('q').addEventListener('input', function () { if (data) drawTable(); });
   Array.prototype.forEach.call(document.querySelectorAll('.chip[data-type]'), function (b) {
     b.addEventListener('click', function () {
       filterType = b.getAttribute('data-type');
       Array.prototype.forEach.call(document.querySelectorAll('.chip[data-type]'), function (o) { o.setAttribute('aria-pressed', String(o === b)); });
-      if (data) drawCards();
+      if (data) drawTable();
     });
   });
   $('onlyAvail').addEventListener('click', function () {
     onlyAvail = !onlyAvail;
     this.setAttribute('aria-pressed', String(onlyAvail));
-    if (data) drawCards();
+    if (data) drawTable();
   });
 
   // ---- Start: use the remembered PIN if this phone has one
