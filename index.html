@@ -125,6 +125,29 @@
   .card-foot .v span { font-size: 12px; font-weight: 500; color: var(--muted); }
   .card-note { font-size: 12px; color: var(--amber); background: var(--amber-bg); margin: 0 16px 12px; padding: 6px 10px; border-radius: 8px; }
 
+  .kitline { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .kitline b { display: inline; font-size: 12px; color: var(--amber); font-weight: 700; }
+  .card-foot.three { grid-template-columns: 1fr 1fr 1fr; }
+  .card-foot.three div { padding: 10px 12px; }
+  .big .kits { font-size: 13px; font-weight: 700; color: var(--amber); margin-top: 6px; }
+
+  /* Where the kits are */
+  .panel { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px 8px; margin-top: 12px; }
+  .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .panel .lbl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .panel-sub { font-size: 12px; color: var(--muted); }
+  .panel-total { font-size: 26px; font-weight: 800; color: var(--amber); font-variant-numeric: tabular-nums; line-height: 1; }
+  .loc { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; width: 100%; padding: 9px 8px; margin: 0 -8px;
+    border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+  .loc:hover { background: #f7f8fb; }
+  .loc[aria-pressed="true"] { background: var(--amber-bg); }
+  .loc .name { font-weight: 600; }
+  .loc .qty { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .loc .bar { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: #f1f2f5; overflow: hidden; }
+  .loc .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f59e0b, #d97706); }
+  .locnote { font-size: 13px; color: var(--amber); background: var(--amber-bg); border-radius: 10px; padding: 8px 12px; margin-top: 8px; }
+  .locnote button { float: right; }
+
   .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
   details.help { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-top: 22px; }
   details.help summary { font-weight: 700; cursor: pointer; }
@@ -175,8 +198,8 @@
   <header>
     <div class="wrap">
       <div class="brand"><span class="logo">TVS</span> Horana Assembly Plant</div>
-      <h1>Vehicles ready to sell</h1>
-      <div class="sub">Ready-made vehicles at the plant that are not yet promised to any order.</div>
+      <h1>Stock for Sales</h1>
+      <div class="sub">What you can order now, what is in stock and where, per model and colour.</div>
       <div class="updated"><span class="dot"></span><span id="updated">Loading…</span></div>
     </div>
   </header>
@@ -185,6 +208,14 @@
     <section class="tiles" id="tiles">
       <div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div>
       <div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div>
+    </section>
+
+    <section class="panel" id="where" hidden>
+      <div class="panel-head">
+        <div><div class="lbl">Where the kits are</div><div class="panel-sub">Not assembled yet · tap a place to see its models</div></div>
+        <div class="panel-total" id="kitsTotal"></div>
+      </div>
+      <div id="locs"></div>
     </section>
 
     <div class="controls">
@@ -206,12 +237,13 @@
     <details class="help">
       <summary>What do the numbers mean?</summary>
       <ul>
-        <li><b>Ready to sell</b> – built vehicles at the plant that are free for new orders. This is the number to order against.</li>
-        <li><b>Coming soon</b> – kits in the plant that are not assembled yet. They become “ready to sell” after assembly.</li>
+        <li><b>Ready</b> – built vehicles at the plant that are free for new orders. This is the number to order against.</li>
+        <li><b>Free to order</b> (three-wheelers) – three-wheelers not promised to any order. They are kept as kits and assembled when ordered.</li>
+        <li><b>Kits</b> – vehicles not assembled yet, and where they are: Plant warehouse, 180/C warehouse, Yard, or Main plant. They become “ready” after assembly.</li>
         <li><b>On order</b> – dealer orders already waiting for this colour (they take stock first).</li>
-        <li><b>In plant</b> – all ready vehicles at the plant: free ones + ones already promised to orders.</li>
+        <li><b>Total stock</b> – everything at the plant: built vehicles (free + already promised) and kits.</li>
         <li><b>Produced / Delivered</b> – vehicles built and sent out, for the latest day and for this month.</li>
-        <li>Stock figures come from the plant’s evening Stock &amp; Delivery report, so they change once a day.</li>
+        <li>Built stock comes from the plant’s evening Stock &amp; Delivery report and kits from the Stores vehicle stock report. Both change once a day.</li>
       </ul>
     </details>
     <footer>TVS Lanka · Horana Assembly Plant · <button class="linkbtn" id="logout">Lock this phone</button></footer>
@@ -230,6 +262,7 @@
   // report's own wording and a colour guessed from the name.
   var MODELS = {
     'NTORQ':              { name: 'NTORQ 125', type: 'Scooter', order: 1 },
+    'NTORQ 150':          { name: 'NTORQ 150', type: 'Scooter', order: 1.5 },
     'JUPITER':            { name: 'Jupiter 110', type: 'Scooter', order: 2 },
     'XL 100 ITOUCH':      { name: 'XL100 iTouch', type: 'Motorcycle', order: 3 },
     'SPORTELS 110':       { name: 'Sport ELS 110', type: 'Motorcycle', order: 4 },
@@ -257,6 +290,9 @@
     'NTORQ|XP RED':         ['Red', 'XP edition', '#c8102e'],
     'NTORQ|XP BLK':         ['Black', 'XP edition', '#1a1a1a'],
     'NTORQ|XP BLUE':        ['Denim Blue', 'XP edition', '#3b5b8c'],
+    'NTORQ 150|RED':        ['Red', '', '#c8102e'],
+    'NTORQ 150|BLUE':       ['Blue', '', '#2c6fd1'],
+    'NTORQ 150|SILVER':     ['Silver', '', 'linear-gradient(135deg,#e6e8eb,#a9adb3)'],
     'JUPITER|COPPER':       ['Galactic Copper', 'Matte', '#a0603b'],
     'JUPITER|DAWN BLUE':    ['Dawn Blue', 'Matte', '#4a6fa5'],
     'XL 100 ITOUCH|GREEN':  ['Green', '', '#3a8f5c'],
@@ -319,7 +355,7 @@
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
   var $ = function (id) { return document.getElementById(id); };
-  var data = null, filterType = 'all', onlyAvail = false;
+  var data = null, filterType = 'all', onlyAvail = false, filterLoc = null;
 
   // ---- PIN + loading
   function showGate(msg) {
@@ -360,18 +396,35 @@
   $('logout').addEventListener('click', function () { store(PIN_KEY, null); $('pin').value = ''; showGate(''); });
 
   // ---- Rendering
+  // Kit locations as the Stores report names them -> [long name, short name]
+  var LOCS = {
+    'Plant WH': ['Plant warehouse', 'Plant WH'],
+    '180/C WH': ['180/C warehouse', '180/C'],
+    'Yard': ['Yard', 'Yard'],
+    'Main Plant': ['Main plant (3W kits)', 'Main plant'],
+    'Munagama WH': ['Munagama warehouse', 'Munagama']
+  };
+  function locName(l, short) { return LOCS[l] ? LOCS[l][short ? 1 : 0] : l; }
+  // What sales can order now: built + free (2W), or free kits (3W, assembled on order)
+  function sell(it) { return (it.available || 0) + (it.freeKits || 0); }
+  function when(iso, key) {
+    if (!iso) return dayLabel(key);
+    return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo' });
+  }
+
   function render() {
     var t = data.totals;
-    var when = data.stockReceivedAt ? new Date(data.stockReceivedAt) : null;
-    $('updated').textContent = 'Stock as at ' + (when
-      ? when.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo' })
-      : dayLabel(data.stockReportDate)) + ' report';
+    $('updated').textContent = 'Built stock: ' + when(data.stockReceivedAt, data.stockReportDate) +
+      ' · Kits: ' + when(data.storesReceivedAt, data.storesReportDate);
 
     $('tiles').innerHTML =
-      tile('hero', 'Ready to sell', t.available, 'free for new orders') +
-      tile('', 'In plant', t.inPlant, '+ ' + fmt(t.comingSoon) + ' kits to assemble') +
+      tile('hero', 'Ready to sell', t.available, t.freeKits
+        ? 'built & free · + ' + fmt(t.freeKits) + ' three-wheelers to order'
+        : 'built & free for new orders') +
+      tile('', 'Total stock', t.totalStock, fmt(t.inPlant) + ' built + ' + fmt(t.kits) + ' kits') +
       tile('', 'Produced', t.producedMonth, 'in ' + monthLabel(data.producedDay) + ' · ' + dayLabel(data.producedDay) + ': ' + fmt(t.producedDay)) +
       tile('', 'Delivered', t.deliveredMonth, 'in ' + monthLabel(data.deliveredDay) + ' · ' + dayLabel(data.deliveredDay) + ': ' + fmt(t.deliveredDay));
+    drawLocations();
     drawCards();
   }
   function tile(cls, lbl, n, note) {
@@ -379,14 +432,39 @@
       '</div><div class="note">' + esc(note) + '</div></div>';
   }
 
+  function drawLocations() {
+    var locs = data.kitsByLocation || {};
+    var names = Object.keys(locs).sort(function (a, b) { return locs[b] - locs[a]; });
+    if (!names.length) { $('where').hidden = true; return; }
+    var max = locs[names[0]] || 1;
+    $('where').hidden = false;
+    $('kitsTotal').textContent = fmt(data.totals.kits);
+    $('locs').innerHTML = names.map(function (l) {
+      return '<button class="loc" data-loc="' + esc(l) + '" aria-pressed="' + (filterLoc === l) + '">' +
+        '<span class="name">' + esc(locName(l)) + '</span><span class="qty">' + fmt(locs[l]) + '</span>' +
+        '<span class="bar"><i style="width:' + Math.max(2, Math.round(locs[l] / max * 100)) + '%"></i></span></button>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.loc'), function (b) {
+      b.addEventListener('click', function () {
+        var l = b.getAttribute('data-loc');
+        filterLoc = (filterLoc === l) ? null : l;
+        drawLocations();
+        drawCards();
+        if (filterLoc) $('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+
   function groupModels() {
     var groups = {};
     data.items.forEach(function (it) {
       var k = norm(it.model);
-      if (!groups[k]) groups[k] = { key: k, info: modelInfo(it.model), is3W: it.category === '3W', colours: [], available: 0, comingSoon: 0, pending: 0, producedMonth: 0, deliveredMonth: 0 };
+      if (!groups[k]) groups[k] = { key: k, info: modelInfo(it.model), is3W: it.category === '3W', colours: [], sell: 0, kits: 0, locKits: 0, pending: 0, producedMonth: 0, deliveredMonth: 0 };
       var g = groups[k];
       g.colours.push(it);
-      ['available', 'comingSoon', 'pending', 'producedMonth', 'deliveredMonth'].forEach(function (f) { g[f] += it[f] || 0; });
+      g.sell += sell(it);
+      g.locKits += filterLoc ? ((it.kitsByLocation || {})[filterLoc] || 0) : 0;
+      ['kits', 'pending', 'producedMonth', 'deliveredMonth'].forEach(function (f) { g[f] += it[f] || 0; });
     });
     return Object.keys(groups).map(function (k) { return groups[k]; });
   }
@@ -395,26 +473,45 @@
     var q = norm($('q').value);
     var list = groupModels().filter(function (g) {
       if (filterType !== 'all' && g.info.type !== filterType) return false;
-      if (onlyAvail && !g.available) return false;
+      if (onlyAvail && !g.sell) return false;
+      if (filterLoc && !g.locKits) return false;
       // Hide models with nothing at all going on (no stock, kits, orders or movement this month)
-      if (!g.available && !g.comingSoon && !g.pending && !g.producedMonth && !g.deliveredMonth) return false;
+      if (!g.sell && !g.kits && !g.pending && !g.producedMonth && !g.deliveredMonth) return false;
       if (!q) return true;
       var hay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type + ' ' + g.colours.map(function (c) {
         var ci = colourInfo(c.model, c.color); return ci.name + ' ' + ci.note + ' ' + c.color;
       }).join(' '));
       return q.split(' ').every(function (w) { return hay.indexOf(w) !== -1; });
     });
-    list.sort(function (a, b) { return (b.available > 0) - (a.available > 0) || a.info.order - b.info.order; });
+    list.sort(function (a, b) {
+      if (filterLoc) return b.locKits - a.locKits;
+      return (b.sell > 0) - (a.sell > 0) || a.info.order - b.info.order;
+    });
 
-    if (!list.length) { $('grid').innerHTML = '<div class="empty">Nothing matches. Try another word, or tap “All”.</div>'; return; }
-    $('grid').innerHTML = list.map(card).join('');
+    var note = filterLoc
+      ? '<div class="locnote" style="grid-column:1/-1">Showing kits in <b>' + esc(locName(filterLoc)) + '</b> <button class="linkbtn" id="clearLoc">Show all</button></div>'
+      : '';
+    if (!list.length) $('grid').innerHTML = note + '<div class="empty">Nothing matches. Try another word, or tap “All”.</div>';
+    else $('grid').innerHTML = note + list.map(card).join('');
+    if ($('clearLoc')) $('clearLoc').addEventListener('click', function () { filterLoc = null; drawLocations(); drawCards(); });
+  }
+
+  function kitLine(c) {
+    var byLoc = c.kitsByLocation || {};
+    var locs = Object.keys(byLoc).filter(function (l) { return byLoc[l] && (!filterLoc || l === filterLoc); })
+      .sort(function (a, b) { return byLoc[b] - byLoc[a]; });
+    if (!locs.length) return '';
+    var n = filterLoc ? byLoc[filterLoc] : c.kits;
+    return '<span class="kitline"><b>' + fmt(n) + ' kits</b> · ' +
+      locs.map(function (l) { return esc(locName(l, true)) + ' ' + fmt(byLoc[l]); }).join(' · ') + '</span>';
   }
 
   function card(g) {
     var colours = g.colours.slice().filter(function (c) {
-      return c.available || c.comingSoon || c.pending || c.producedMonth || c.deliveredMonth;
-    }).sort(function (a, b) { return b.available - a.available || b.comingSoon - a.comingSoon; });
-    if (onlyAvail) colours = colours.filter(function (c) { return c.available > 0; });
+      return sell(c) || c.kits || c.pending || c.producedMonth || c.deliveredMonth;
+    }).sort(function (a, b) { return sell(b) - sell(a) || (b.kits || 0) - (a.kits || 0); });
+    if (onlyAvail) colours = colours.filter(function (c) { return sell(c) > 0; });
+    if (filterLoc) colours = colours.filter(function (c) { return (c.kitsByLocation || {})[filterLoc] > 0; });
     // A search like "ntorq red" shows only the matching colours of that model
     var words = norm($('q').value).split(' ').filter(Boolean);
     var modelHay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type);
@@ -428,25 +525,26 @@
 
     var rows = colours.map(function (c) {
       var ci = colourInfo(c.model, c.color);
-      var tags = '';
-      if (c.comingSoon) tags += '<span class="tag soon">' + fmt(c.comingSoon) + ' coming soon</span>';
-      if (c.pending) tags += '<span class="tag order">' + fmt(c.pending) + ' on order</span>';
+      var n = sell(c);
       return '<li class="colour"><span class="sw" style="background:' + ci.sw + '"></span>' +
-        '<div class="cname"><b>' + esc(ci.name) + '</b>' + (ci.note ? '<small>' + esc(ci.note) + '</small>' : '') + tags + '</div>' +
-        '<div class="cnum"><div class="n ' + (c.available ? 'pos' : 'zero') + '">' + fmt(c.available) + '</div><div class="t">ready</div></div></li>';
+        '<div class="cname"><b>' + esc(ci.name) + '</b>' + (ci.note ? '<small>' + esc(ci.note) + '</small>' : '') +
+        kitLine(c) + (c.pending ? '<span class="tag order">' + fmt(c.pending) + ' on order</span>' : '') + '</div>' +
+        '<div class="cnum"><div class="n ' + (n ? 'pos' : 'zero') + '">' + fmt(n) + '</div><div class="t">' + (g.is3W ? 'free' : 'ready') + '</div></div></li>';
     }).join('');
 
-    var badge = g.available
+    var badge = g.sell
       ? '<span class="badge ok">Available</span>'
-      : (g.comingSoon ? '<span class="badge no">Being assembled</span>' : '<span class="badge no">Out of stock</span>');
+      : (g.kits ? '<span class="badge no">Kits in stock</span>' : '<span class="badge no">Out of stock</span>');
 
-    return '<article class="card' + (g.available ? '' : ' none') + '">' +
+    return '<article class="card' + (g.sell ? '' : ' none') + '">' +
       '<div class="card-top"><div><div class="type">' + esc(g.info.type) + '</div><div class="model">' + esc(g.info.name) + '</div>' + badge + '</div>' +
-      '<div class="big"><div class="n">' + fmt(g.available) + '</div><div class="t">ready to sell</div></div></div>' +
-      (g.is3W ? '<div class="card-note">For three-wheelers the plant report counts assembled and not-yet-assembled together.</div>' : '') +
+      '<div class="big"><div class="n">' + fmt(g.sell) + '</div><div class="t">' + (g.is3W ? 'free to order' : 'ready to sell') + '</div>' +
+      (g.kits ? '<div class="kits">+ ' + fmt(g.kits) + ' kits</div>' : '') + '</div></div>' +
+      (g.is3W ? '<div class="card-note">Three-wheelers are kept as kits and assembled when ordered.</div>' : '') +
       '<ul class="colours">' + rows + '</ul>' +
-      '<div class="card-foot"><div><div class="k">Produced</div><div class="v">' + fmt(g.producedMonth) + ' <span>in ' + esc(monthLabel(data.producedDay)) + '</span></div></div>' +
-      '<div><div class="k">Delivered</div><div class="v">' + fmt(g.deliveredMonth) + ' <span>in ' + esc(monthLabel(data.deliveredDay)) + '</span></div></div></div>' +
+      '<div class="card-foot three"><div><div class="k">Kits</div><div class="v">' + fmt(g.kits) + '</div></div>' +
+      '<div><div class="k">Made · ' + esc(monthLabel(data.producedDay).slice(0, 3)) + '</div><div class="v">' + fmt(g.producedMonth) + '</div></div>' +
+      '<div><div class="k">Delivered · ' + esc(monthLabel(data.deliveredDay).slice(0, 3)) + '</div><div class="v">' + fmt(g.deliveredMonth) + '</div></div></div>' +
       '</article>';
   }
 
