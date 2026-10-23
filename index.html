@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b3d91">
+<title>TVS Stock for Sales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f5fa;
+    --card: #ffffff;
+    --ink: #111827;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --brand: #0b3d91;
+    --brand-2: #1d5fd1;
+    --red: #d7262e;
+    --green: #0f9d58;
+    --green-bg: #e7f6ee;
+    --amber: #b45309;
+    --amber-bg: #fdf3e2;
+    --grey-bg: #f1f2f5;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 6px 18px rgba(16,24,40,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 15px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 48px; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0b3d91 0%, #1d5fd1 60%, #2f7cf6 100%);
+    color: #fff; padding: 22px 0 64px; position: relative; overflow: hidden;
+  }
+  header::after {
+    content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
+    border-radius: 50%; background: rgba(255,255,255,.08);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2px; }
+  .brand .logo {
+    background: #fff; color: var(--red); font-weight: 900; border-radius: 8px;
+    padding: 3px 8px; font-size: 14px; letter-spacing: .5px;
+  }
+  h1 { font-size: 26px; line-height: 1.15; margin: 14px 0 6px; font-weight: 800; }
+  .sub { opacity: .9; font-size: 14px; }
+  .updated {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 12px;
+    background: rgba(255,255,255,.15); border-radius: 999px; padding: 6px 12px; font-size: 13px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.3); }
+
+  /* Totals */
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: -44px; position: relative; }
+  @media (min-width: 760px) { .tiles { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
+  .tile { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 14px 12px; }
+  .tile .lbl { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .tile .num { font-size: 30px; font-weight: 800; line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .tile .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .tile.hero { background: linear-gradient(160deg, #0f9d58, #0b7a44); color: #fff; }
+  .tile.hero .lbl, .tile.hero .note { color: rgba(255,255,255,.88); }
+
+  /* Controls */
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 14px 0 10px; }
+  .search {
+    width: 100%; font: inherit; font-size: 16px; padding: 13px 16px 13px 42px; border-radius: 14px;
+    border: 1px solid var(--line); background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>") no-repeat 14px center;
+    outline: none;
+  }
+  .search:focus { border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(29,95,209,.15); }
+  .chips { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; border: 1px solid var(--line); background: #fff; color: var(--ink);
+    padding: 8px 14px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip.toggle[aria-pressed="true"] { background: var(--green); border-color: var(--green); }
+
+  /* Model cards */
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 6px; }
+  @media (min-width: 760px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1060px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 16px 10px; }
+  .type { font-size: 11px; font-weight: 700; color: var(--brand-2); text-transform: uppercase; letter-spacing: .6px; }
+  .model { font-size: 20px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
+  .big { text-align: right; flex: 0 0 auto; }
+  .big .n { font-size: 34px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--green); }
+  .big .t { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+  .card.none .big .n { color: #9ca3af; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; margin-top: 6px; }
+  .badge.ok { background: var(--green-bg); color: var(--green); }
+  .badge.no { background: var(--grey-bg); color: var(--muted); }
+
+  .colours { list-style: none; margin: 0; padding: 0 8px 8px; }
+  .colour { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-top: 1px solid var(--line); }
+  .colour:first-child { border-top: 0; }
+  .sw { width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto; box-shadow: inset 0 0 0 2px rgba(255,255,255,.6), 0 0 0 1px rgba(0,0,0,.12); }
+  .cname { flex: 1; min-width: 0; }
+  .cname b { display: block; font-weight: 600; font-size: 15px; }
+  .cname small { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .cnum { text-align: right; min-width: 64px; }
+  .cnum .n { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .cnum .n.zero { color: #c0c4cc; }
+  .cnum .n.pos { color: var(--green); }
+  .cnum .t { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 6px; margin: 4px 4px 0 0; }
+  .tag.soon { background: var(--amber-bg); color: var(--amber); }
+  .tag.order { background: #eef2ff; color: #3949ab; }
+
+  .card-foot { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); background: #fafbfd; }
+  .card-foot div { padding: 10px 16px; }
+  .card-foot div + div { border-left: 1px solid var(--line); }
+  .card-foot .k { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .card-foot .v { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card-foot .v span { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .card-note { font-size: 12px; color: var(--amber); background: var(--amber-bg); margin: 0 16px 12px; padding: 6px 10px; border-radius: 8px; }
+
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  details.help { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-top: 22px; }
+  details.help summary { font-weight: 700; cursor: pointer; }
+  details.help ul { margin: 10px 0 0; padding-left: 18px; color: #374151; }
+  details.help li { margin: 6px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 22px; }
+  .linkbtn { background: none; border: 0; color: var(--brand-2); font: inherit; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+
+  /* PIN screen */
+  .gate { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+    background: linear-gradient(160deg, #0b3d91 0%, #1d5fd1 55%, #2f7cf6 100%); }
+  .gate-card { width: 100%; max-width: 360px; background: #fff; border-radius: 24px; padding: 28px 22px; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center; }
+  .gate-card h2 { margin: 14px 0 4px; font-size: 22px; }
+  .gate-card p { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+  .pin {
+    width: 100%; font: inherit; font-size: 28px; letter-spacing: 10px; text-align: center; font-weight: 700;
+    padding: 12px; border-radius: 14px; border: 2px solid var(--line); outline: none;
+  }
+  .pin:focus { border-color: var(--brand-2); }
+  .btn { width: 100%; margin-top: 14px; font: inherit; font-weight: 700; font-size: 16px; color: #fff; background: var(--brand);
+    border: 0; border-radius: 14px; padding: 14px; cursor: pointer; }
+  .btn[disabled] { opacity: .6; cursor: wait; }
+  .err { color: var(--red); font-size: 14px; min-height: 20px; margin-top: 10px; }
+  .gate .brand { justify-content: center; color: var(--brand); }
+  .gate .brand .logo { background: var(--red); color: #fff; }
+
+  .skeleton { height: 160px; border-radius: var(--radius); background: linear-gradient(90deg, #eceff4 0%, #f6f7fa 50%, #eceff4 100%); background-size: 200% 100%; animation: sh 1.2s infinite; }
+  @keyframes sh { to { background-position: -200% 0; } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- PIN screen -->
+<section class="gate" id="gate" hidden>
+  <form class="gate-card" id="pinForm" autocomplete="off">
+    <div class="brand"><span class="logo">TVS</span> Horana Plant</div>
+    <h2>Stock for Sales</h2>
+    <p>Enter the PIN you were given</p>
+    <input class="pin" id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" aria-label="PIN" required>
+    <button class="btn" id="pinBtn" type="submit">Open</button>
+    <div class="err" id="pinErr" role="alert"></div>
+  </form>
+</section>
+
+<!-- Dashboard -->
+<div id="app" hidden>
+  <header>
+    <div class="wrap">
+      <div class="brand"><span class="logo">TVS</span> Horana Assembly Plant</div>
+      <h1>Vehicles ready to sell</h1>
+      <div class="sub">Ready-made vehicles at the plant that are not yet promised to any order.</div>
+      <div class="updated"><span class="dot"></span><span id="updated">Loading…</span></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="tiles" id="tiles">
+      <div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div>
+      <div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div>
+    </section>
+
+    <div class="controls">
+      <input class="search" id="q" type="search" placeholder="Search a model or colour… e.g. Ntorq, red" aria-label="Search">
+      <div class="chips" id="chips">
+        <button class="chip" data-type="all" aria-pressed="true">All</button>
+        <button class="chip" data-type="Scooter" aria-pressed="false">Scooters</button>
+        <button class="chip" data-type="Motorcycle" aria-pressed="false">Motorcycles</button>
+        <button class="chip" data-type="Electric" aria-pressed="false">Electric</button>
+        <button class="chip" data-type="Three-wheeler" aria-pressed="false">Three-wheelers</button>
+        <button class="chip toggle" id="onlyAvail" aria-pressed="false">✓ Only available</button>
+      </div>
+    </div>
+
+    <section class="grid" id="grid">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </section>
+
+    <details class="help">
+      <summary>What do the numbers mean?</summary>
+      <ul>
+        <li><b>Ready to sell</b> – built vehicles at the plant that are free for new orders. This is the number to order against.</li>
+        <li><b>Coming soon</b> – kits in the plant that are not assembled yet. They become “ready to sell” after assembly.</li>
+        <li><b>On order</b> – dealer orders already waiting for this colour (they take stock first).</li>
+        <li><b>In plant</b> – all ready vehicles at the plant: free ones + ones already promised to orders.</li>
+        <li><b>Produced / Delivered</b> – vehicles built and sent out, for the latest day and for this month.</li>
+        <li>Stock figures come from the plant’s evening Stock &amp; Delivery report, so they change once a day.</li>
+      </ul>
+    </details>
+    <footer>TVS Lanka · Horana Assembly Plant · <button class="linkbtn" id="logout">Lock this phone</button></footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec?module=salesStock';
+  var PIN_KEY = 'tvsSalesPin';
+  var DEMO = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]demo\b/.test(location.search);
+
+  // ---- Friendly names and colours. Keys are the names used in the plant's
+  // Stock & Delivery report (upper case). Anything missing falls back to the
+  // report's own wording and a colour guessed from the name.
+  var MODELS = {
+    'NTORQ':              { name: 'NTORQ 125', type: 'Scooter', order: 1 },
+    'JUPITER':            { name: 'Jupiter 110', type: 'Scooter', order: 2 },
+    'XL 100 ITOUCH':      { name: 'XL100 iTouch', type: 'Motorcycle', order: 3 },
+    'SPORTELS 110':       { name: 'Sport ELS 110', type: 'Motorcycle', order: 4 },
+    'RAIDER 125':         { name: 'Raider 125', type: 'Motorcycle', order: 5 },
+    'RTR 160':            { name: 'Apache RTR 160 4V', type: 'Motorcycle', order: 6 },
+    'RTR 200':            { name: 'Apache RTR 200 4V', type: 'Motorcycle', order: 7 },
+    'RTR 310':            { name: 'Apache RTR 310', type: 'Motorcycle', order: 8 },
+    'RR 310':             { name: 'Apache RR 310', type: 'Motorcycle', order: 9 },
+    'RONIN':              { name: 'Ronin 225', type: 'Motorcycle', order: 10 },
+    'IQUBE ELECTRIC 2.2': { name: 'iQube 2.2 kWh', type: 'Electric', order: 11 },
+    'IQUBE ELECTRIC 3.4': { name: 'iQube S 3.4 kWh', type: 'Electric', order: 12 },
+    'ORBITER':            { name: 'Orbiter V2', type: 'Electric', order: 13 },
+    '3 WHEEL':            { name: 'TVS King Deluxe', type: 'Three-wheeler', order: 14 },
+    '3W EV':              { name: 'TVS King EV', type: 'Three-wheeler', order: 15 }
+  };
+  var COLOURS = {
+    'NTORQ|RED/ BLACK FI':  ['Racing Red', 'Race Edition · FI', 'linear-gradient(135deg,#c8102e 55%,#111 55%)'],
+    'NTORQ|M BLUE FI':      ['Marine Blue', 'Race Edition · FI', 'linear-gradient(135deg,#1f4e9c 55%,#111 55%)'],
+    'NTORQ|RED/ BLACK RE':  ['Red / Black', 'Race Edition', 'linear-gradient(135deg,#c8102e 55%,#111 55%)'],
+    'NTORQ|DISC/CARB RED':  ['Racing Red', 'Disc · Carburettor', '#c8102e'],
+    'NTORQ|DRUM GREY':      ['Nardo Grey', 'Drum brake', '#8a8d8f'],
+    'NTORQ|DRUM BLUE':      ['Harlequin Blue', 'Drum brake', '#2c6fd1'],
+    'NTORQ|DISC FI GREY':   ['Nardo Grey', 'Disc · FI', '#8a8d8f'],
+    'NTORQ|DISC FI BLUE':   ['Harlequin Blue', 'Disc · FI', '#2c6fd1'],
+    'NTORQ|XP RED':         ['Red', 'XP edition', '#c8102e'],
+    'NTORQ|XP BLK':         ['Black', 'XP edition', '#1a1a1a'],
+    'NTORQ|XP BLUE':        ['Denim Blue', 'XP edition', '#3b5b8c'],
+    'JUPITER|COPPER':       ['Galactic Copper', 'Matte', '#a0603b'],
+    'JUPITER|DAWN BLUE':    ['Dawn Blue', 'Matte', '#4a6fa5'],
+    'XL 100 ITOUCH|GREEN':  ['Green', '', '#3a8f5c'],
+    'SPORTELS 110|BLK':     ['Black', '', '#1a1a1a'],
+    'SPORTELS 110|GREY':    ['Grey', '', '#8a8d8f'],
+    'RTR 160|BLK':          ['Matte Black', '', '#1f1f1f'],
+    'RTR 160|GREY':         ['Granite Grey', '', '#6b6e70'],
+    'RTR 160|BLUE':         ['Marine Blue', '', '#1f4e9c'],
+    'RTR 160|RED':          ['Racing Red', '', '#c8102e'],
+    'RTR 200|BLK':          ['Matte Black', '', '#1f1f1f'],
+    'RTR 200|GREY':         ['Granite Grey', '', '#6b6e70'],
+    'RTR 310|BLUE':         ['Sepang Blue', '', '#1b5fbf'],
+    'RTR 310|BLK/RED':      ['Black / Red', '', 'linear-gradient(135deg,#111 55%,#c8102e 55%)'],
+    'RTR 310|RED':          ['Racing Red', '', '#c8102e'],
+    'RTR 310|YELLOW':       ['Black / Yellow', '', 'linear-gradient(135deg,#111 55%,#f5c518 55%)'],
+    'RR 310|RED':           ['Racing Red', '', '#c8102e'],
+    'RR 310|GREY':          ['Bomber Grey', '', '#5f6366'],
+    'RONIN|BLUE':           ['Midnight Blue', '', '#1c2b4a'],
+    'RONIN|GREY':           ['Nimbus Grey', '', '#9a9ea3'],
+    'IQUBE ELECTRIC 2.2|P WHITE': ['Pearl White', '', '#f4f4f0'],
+    'IQUBE ELECTRIC 2.2|T GREY':  ['Titanium Grey', '', '#7d8186'],
+    'IQUBE ELECTRIC 3.4|P WHITE': ['Pearl White', '', '#f4f4f0'],
+    'IQUBE ELECTRIC 3.4|T GREY':  ['Titanium Grey', '', '#7d8186'],
+    'IQUBE ELECTRIC 3.4|MERCURY GREY':   ['Mercury Grey', '', '#9ea3a8'],
+    'IQUBE ELECTRIC 3.4|STARLIGHT BLUE': ['Starlight Blue', '', '#3d6fb6'],
+    'IQUBE ELECTRIC 3.4|S BLUE':         ['Starlight Blue', '', '#3d6fb6'],
+    'ORBITER|ST.BLUE':          ['Stratos Blue', '', '#2b6cb0'],
+    'ORBITER|NEON GREEN':       ['Neon Green', '', '#9be15d'],
+    'ORBITER|MARTIN COPPER':    ['Martian Copper', '', '#b5653a'],
+    'ORBITER|COSMIC TITAMIUM':  ['Cosmic Titanium', '', '#8c8f94']
+  };
+  var GUESS = [
+    [/YELLOW/, '#f5c518'], [/GREEN/, '#3a8f5c'], [/COPPER|BROWN/, '#8b5a3c'], [/WHITE/, '#f4f4f0'],
+    [/RED/, '#c8102e'], [/BLUE/, '#2c6fd1'], [/GR[AE]Y|SILVER|TITAN/, '#8a8d8f'], [/BLK|BLACK/, '#1a1a1a']
+  ];
+  function norm(s) { return String(s || '').toUpperCase().replace(/\s+/g, ' ').trim(); }
+  function titleCase(s) { return String(s).toLowerCase().replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); }); }
+  function modelInfo(m) {
+    return MODELS[norm(m)] || { name: titleCase(m), type: /3W|WHEEL|KING/i.test(m) ? 'Three-wheeler' : /IQUBE|ORBITER|EV/i.test(m) ? 'Electric' : 'Motorcycle', order: 99 };
+  }
+  function colourInfo(m, c) {
+    var hit = COLOURS[norm(m) + '|' + norm(c)];
+    if (hit) return { name: hit[0], note: hit[1], sw: hit[2] };
+    var sw = '#c9ccd1';
+    for (var i = 0; i < GUESS.length; i++) if (GUESS[i][0].test(norm(c))) { sw = GUESS[i][1]; break; }
+    return { name: titleCase(c), note: '', sw: sw };
+  }
+  function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
+  function dayLabel(key) {
+    if (!key) return '';
+    var d = new Date(key + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+  function monthLabel(key) {
+    if (!key) return 'this month';
+    return new Date(key + 'T00:00:00').toLocaleDateString('en-GB', { month: 'long' });
+  }
+  function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var data = null, filterType = 'all', onlyAvail = false;
+
+  // ---- PIN + loading
+  function showGate(msg) {
+    $('app').hidden = true; $('gate').hidden = false;
+    $('pinErr').textContent = msg || '';
+    $('pinBtn').disabled = false; $('pinBtn').textContent = 'Open';
+    setTimeout(function () { $('pin').focus(); }, 50);
+  }
+  function fetchData(pin) {
+    var url = DEMO ? 'demo.json' : API + '&pin=' + encodeURIComponent(pin) + '&t=' + Date.now();
+    return fetch(url, { cache: 'no-store' }).then(function (r) { return r.json(); });
+  }
+  function open(pin, fromForm) {
+    if (fromForm) { $('pinBtn').disabled = true; $('pinBtn').textContent = 'Checking…'; }
+    fetchData(pin).then(function (res) {
+      if (res && res.ok) {
+        store(PIN_KEY, pin);
+        data = res;
+        $('gate').hidden = true; $('app').hidden = false;
+        render();
+      } else if (res && res.error === 'pin') {
+        store(PIN_KEY, null);
+        showGate(fromForm ? 'That PIN is not right. Please try again.' : '');
+      } else if (res && res.error === 'locked') {
+        showGate('Too many wrong PINs. Please wait 10 minutes and try again.');
+      } else {
+        showGate('The stock figures are not available right now. Please try again later.');
+      }
+    }).catch(function () {
+      showGate('Could not connect. Check your internet and try again.');
+    });
+  }
+  $('pinForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var pin = $('pin').value.trim();
+    if (pin) open(pin, true);
+  });
+  $('logout').addEventListener('click', function () { store(PIN_KEY, null); $('pin').value = ''; showGate(''); });
+
+  // ---- Rendering
+  function render() {
+    var t = data.totals;
+    var when = data.stockReceivedAt ? new Date(data.stockReceivedAt) : null;
+    $('updated').textContent = 'Stock as at ' + (when
+      ? when.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Colombo' })
+      : dayLabel(data.stockReportDate)) + ' report';
+
+    $('tiles').innerHTML =
+      tile('hero', 'Ready to sell', t.available, 'free for new orders') +
+      tile('', 'In plant', t.inPlant, '+ ' + fmt(t.comingSoon) + ' kits to assemble') +
+      tile('', 'Produced', t.producedMonth, 'in ' + monthLabel(data.producedDay) + ' · ' + dayLabel(data.producedDay) + ': ' + fmt(t.producedDay)) +
+      tile('', 'Delivered', t.deliveredMonth, 'in ' + monthLabel(data.deliveredDay) + ' · ' + dayLabel(data.deliveredDay) + ': ' + fmt(t.deliveredDay));
+    drawCards();
+  }
+  function tile(cls, lbl, n, note) {
+    return '<div class="tile ' + cls + '"><div class="lbl">' + esc(lbl) + '</div><div class="num">' + fmt(n) +
+      '</div><div class="note">' + esc(note) + '</div></div>';
+  }
+
+  function groupModels() {
+    var groups = {};
+    data.items.forEach(function (it) {
+      var k = norm(it.model);
+      if (!groups[k]) groups[k] = { key: k, info: modelInfo(it.model), is3W: it.category === '3W', colours: [], available: 0, comingSoon: 0, pending: 0, producedMonth: 0, deliveredMonth: 0 };
+      var g = groups[k];
+      g.colours.push(it);
+      ['available', 'comingSoon', 'pending', 'producedMonth', 'deliveredMonth'].forEach(function (f) { g[f] += it[f] || 0; });
+    });
+    return Object.keys(groups).map(function (k) { return groups[k]; });
+  }
+
+  function drawCards() {
+    var q = norm($('q').value);
+    var list = groupModels().filter(function (g) {
+      if (filterType !== 'all' && g.info.type !== filterType) return false;
+      if (onlyAvail && !g.available) return false;
+      // Hide models with nothing at all going on (no stock, kits, orders or movement this month)
+      if (!g.available && !g.comingSoon && !g.pending && !g.producedMonth && !g.deliveredMonth) return false;
+      if (!q) return true;
+      var hay = norm(g.info.name + ' ' + g.key + ' ' + g.info.type + ' ' + g.colours.map(function (c) {
+        var ci = colourInfo(c.model, c.color); return ci.name + ' ' + ci.note + ' ' + c.color;
+      }).join(' '));
+      return q.split(' ').every(function (w) { return hay.indexOf(w) !== -1; });
+    });
+    list.sort(function (a, b) { return (b.available > 0) - (a.available > 0) || a.info.order - b.info.order; });
+
+    if (!list.length) { $('grid').innerHTML = '<div class="empty">Nothing matches. Try another word, or tap “All”.</div>'; return; }
+    $('grid').innerHTML = list.map(card).join('');
+  }
+
+  function card(g) {
+    var colours = g.colours.slice().filter(function (c) {
+      return c.available || c.comingSoon || c.pending || c.producedMonth || c.deliveredMonth;
+    }).sort(function (a, b) { return b.available - a.available || b.comingSoon - a.comingSoon; });
+    if (onlyAvail) colours = colours.filter(function (c) { return c.available > 0; });
+
+    var rows = colours.map(function (c) {
+      var ci = colourInfo(c.model, c.color);
+      var tags = '';
+      if (c.comingSoon) tags += '<span class="tag soon">' + fmt(c.comingSoon) + ' coming soon</span>';
+      if (c.pending) tags += '<span class="tag order">' + fmt(c.pending) + ' on order</span>';
+      return '<li class="colour"><span class="sw" style="background:' + ci.sw + '"></span>' +
+        '<div class="cname"><b>' + esc(ci.name) + '</b>' + (ci.note ? '<small>' + esc(ci.note) + '</small>' : '') + tags + '</div>' +
+        '<div class="cnum"><div class="n ' + (c.available ? 'pos' : 'zero') + '">' + fmt(c.available) + '</div><div class="t">ready</div></div></li>';
+    }).join('');
+
+    var badge = g.available
+      ? '<span class="badge ok">Available</span>'
+      : (g.comingSoon ? '<span class="badge no">Being assembled</span>' : '<span class="badge no">Out of stock</span>');
+
+    return '<article class="card' + (g.available ? '' : ' none') + '">' +
+      '<div class="card-top"><div><div class="type">' + esc(g.info.type) + '</div><div class="model">' + esc(g.info.name) + '</div>' + badge + '</div>' +
+      '<div class="big"><div class="n">' + fmt(g.available) + '</div><div class="t">ready to sell</div></div></div>' +
+      (g.is3W ? '<div class="card-note">For three-wheelers the plant report counts assembled and not-yet-assembled together.</div>' : '') +
+      '<ul class="colours">' + rows + '</ul>' +
+      '<div class="card-foot"><div><div class="k">Produced</div><div class="v">' + fmt(g.producedMonth) + ' <span>in ' + esc(monthLabel(data.producedDay)) + '</span></div></div>' +
+      '<div><div class="k">Delivered</div><div class="v">' + fmt(g.deliveredMonth) + ' <span>in ' + esc(monthLabel(data.deliveredDay)) + '</span></div></div></div>' +
+      '</article>';
+  }
+
+  // ---- Controls
+  $('q').addEventListener('input', function () { if (data) drawCards(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip[data-type]'), function (b) {
+    b.addEventListener('click', function () {
+      filterType = b.getAttribute('data-type');
+      Array.prototype.forEach.call(document.querySelectorAll('.chip[data-type]'), function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      if (data) drawCards();
+    });
+  });
+  $('onlyAvail').addEventListener('click', function () {
+    onlyAvail = !onlyAvail;
+    this.setAttribute('aria-pressed', String(onlyAvail));
+    if (data) drawCards();
+  });
+
+  // ---- Start: use the remembered PIN if this phone has one
+  var saved = DEMO ? 'demo' : load(PIN_KEY);
+  if (saved) { $('app').hidden = false; open(saved, false); }
+  else showGate('');
+
+  // Refresh every 30 minutes while the page stays open
+  setInterval(function () { var p = DEMO ? 'demo' : load(PIN_KEY); if (p && !document.hidden) open(p, false); }, 30 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
