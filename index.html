@@ -150,6 +150,35 @@
   tfoot td.z { color: #6b7280; }
   .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
 
+  /* Data sources */
+  :root { --src-sd: #1d5fd1; --src-st: #d97706; --src-pr: #7c3aed; }
+  details.sources { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 16px; margin: 4px 0 14px; }
+  details.sources summary { font-weight: 800; cursor: pointer; }
+  .src-sum { font-weight: 500; color: var(--muted); font-size: 13px; }
+  .src-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+  @media (min-width: 820px) { .src-grid { grid-template-columns: repeat(3, 1fr); } }
+  .src { border: 1px solid var(--line); border-left-width: 4px; border-radius: 12px; padding: 10px 12px; }
+  .src-stockDelivery { border-left-color: var(--src-sd); }
+  .src-stores { border-left-color: var(--src-st); }
+  .src-production { border-left-color: var(--src-pr); }
+  .src-name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .src-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+  .src-stockDelivery .src-name { color: var(--src-sd); }
+  .src-stores .src-name { color: var(--src-st); }
+  .src-production .src-name { color: var(--src-pr); }
+  .src dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 8px 0 0; font-size: 13px; }
+  .src dt { color: var(--muted); }
+  .src dd { margin: 0; word-break: break-word; }
+  .src-note { font-size: 12px; color: var(--muted); margin: 10px 0 2px; }
+  thead tr.srcrow th { font-size: 10px; font-weight: 700; text-transform: none; letter-spacing: 0; padding: 3px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+  thead tr.srcrow th:first-child { text-align: left; color: var(--muted); }
+  .srctag { display: inline-block; border-radius: 6px; padding: 1px 7px; color: #fff; white-space: nowrap; }
+  .srctag.sd { background: var(--src-sd); }
+  .srctag.st { background: var(--src-st); }
+  .srctag.pr { background: var(--src-pr); }
+  .tip-src { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,.15); font-size: 12px; color: #c7d2fe; }
+  details.help .tip-src { border-top: 0; padding-top: 0; margin-top: 2px; color: var(--muted); font-style: italic; }
+
   details.help { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-top: 18px; }
   details.help summary { font-weight: 700; cursor: pointer; }
   details.help dl { margin: 10px 0 0; }
@@ -221,6 +250,12 @@
         <button class="chip toggle" id="onlyAvail" aria-pressed="false">✓ Can sell now</button>
       </div>
     </div>
+
+    <details class="sources" id="sources" open>
+      <summary>Data sources <span class="src-sum">– where every number comes from</span></summary>
+      <div class="src-grid" id="sourceList"></div>
+      <p class="src-note">All figures are taken from these reports as the MIS reads them; nothing is typed in by hand. Each report arrives once a day.</p>
+    </details>
 
     <section class="table-card">
       <div class="hint">Hover over or tap any heading <i class="i">i</i> to see what it means. <span class="swipe">Swipe the table sideways to see all columns.</span></div>
@@ -364,9 +399,22 @@
   }
   function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  // Which report each figure comes from (keys of data.sources)
+  var SOURCE_OF = { sell: ['stockDelivery'], free: ['stockDelivery'], pending: ['stockDelivery'], short: ['stockDelivery'],
+    deliv: ['stockDelivery'], kits: ['stores'], made: ['production'], total: ['stockDelivery', 'stores'] };
+  var SRC_SHORT = { stockDelivery: 'Stock & Delivery report', stores: 'Stores Vehicle Stock report', production: 'Production sheet' };
+  function srcLine(key) {
+    var keys = SOURCE_OF[key] || (LOC_TIPS[key] ? ['stores'] : []);
+    var S = (data && data.sources) || {};
+    return keys.map(function (k) {
+      var s = S[k] || {};
+      return '<span class="tip-src">Source: ' + esc(SRC_SHORT[k]) + (s.fileName ? ' – ' + esc(s.fileName) : '') +
+        (s.receivedAt ? ' (' + (k === 'production' ? 'updated ' : 'received ') + esc(when(s.receivedAt)) + ')' : '') + '</span>';
+    }).join('');
+  }
   function tipAttr(key, extra) {
     var t = TIPS[key] || LOC_TIPS[key];
-    return ' data-tip="' + esc('<b>' + t[0] + '</b><br>' + t[1] + (extra ? '<br>' + extra : '')) + '" tabindex="0"';
+    return ' data-tip="' + esc('<b>' + t[0] + '</b><br>' + t[1] + (extra ? '<br>' + extra : '') + srcLine(key)) + '" tabindex="0"';
   }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -423,12 +471,34 @@
       tile('', 'made', 'Made in ' + mon, t.producedMonth, dayLabel(data.producedDay) + ': ' + fmt(t.producedDay)) +
       tile('', 'deliv', 'Delivered in ' + monthLabel(data.deliveredDay), t.deliveredMonth, dayLabel(data.deliveredDay) + ': ' + fmt(t.deliveredDay));
 
-    var gl = ['sell', 'free', 'pending', 'short', 'kits'].map(function (k) { return TIPS[k]; });
-    locsInData().forEach(function (l) { gl.push(LOC_TIPS[l] || [l, 'Kits stored at ' + l + '.']); });
-    gl.push(TIPS.made, TIPS.deliv, TIPS.total, TIPS.warn);
-    gl.push(['Where the figures come from', 'Ready, free kits and orders: the plant’s evening Stock &amp; Delivery report. Kits and their location: the Stores vehicle stock report. Made: the production executive’s daily sheet. Each updates once a day; the times are at the top of the page.']);
-    $('glossary').innerHTML = gl.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>'; }).join('');
+    var gl = ['sell', 'free', 'pending', 'short', 'kits'].map(function (k) { return TIPS[k].concat(k); });
+    locsInData().forEach(function (l) { gl.push((LOC_TIPS[l] || [l, 'Kits stored at ' + l + '.']).concat(l)); });
+    gl.push(TIPS.made.concat('made'), TIPS.deliv.concat('deliv'), TIPS.total.concat('total'), TIPS.warn);
+    $('glossary').innerHTML = gl.map(function (g) { return '<dt>' + g[0] + '</dt><dd>' + g[1] + (g[2] ? srcLine(g[2]) : '') + '</dd>'; }).join('');
+    drawSources();
     drawTable();
+  }
+
+  function drawSources() {
+    var S = data.sources || {};
+    var used = {
+      stockDelivery: 'Ready to sell, Free kits, Orders pending, No built stock, Delivered',
+      stores: 'Kits total and where they are (' + locsInData().map(function (l) { return LOC_TIPS[l] ? LOC_TIPS[l][0] : l; }).join(', ') + ')',
+      production: 'Made'
+    };
+    var who = { stockDelivery: 'Delivery team (plant)', stores: 'Horana Stores', production: 'Production executive' };
+    $('sourceList').innerHTML = ['stockDelivery', 'stores', 'production'].map(function (k) {
+      var s = S[k] || {};
+      var rows = [
+        ['From', who[k] + (s.sender ? ' · ' + s.sender : '')],
+        [k === 'production' ? 'Sheet' : 'File', s.fileName || '–'],
+        [k === 'production' ? 'Updated' : 'Received', s.receivedAt ? when(s.receivedAt) : '–'],
+        [k === 'production' ? 'Latest day' : 'Report for', dayLabel(s.reportDate) || '–'],
+        ['Used for', used[k]]
+      ];
+      return '<div class="src src-' + k + '"><div class="src-name"><span class="src-dot"></span>' + esc(SRC_SHORT[k]) + '</div><dl>' +
+        rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('') + '</dl></div>';
+    }).join('');
   }
   function tile(cls, tipKey, lbl, n, note) {
     return '<div class="tile ' + cls + '"><div class="lbl"' + tipAttr(tipKey) + '>' + esc(lbl) + '<i class="i">i</i></div><div class="num">' + fmt(n) +
@@ -489,7 +559,7 @@
     var it = r.it;
     var s = sum([r]);
     var warn = it.check ? '<span class="warn"' + tipAttr('warn', esc(it.check)) + '>!</span>' : '';
-    return '<tr class="colour' + (inVariant ? ' in-variant' : '') + '"><td><span class="cname"><span class="sw" style="background:' + r.ci.sw + '"></span>' +
+    return '<tr class="colour' + (inVariant ? ' in-variant' : '') + '" data-key="' + esc(norm(it.category) + '|' + norm(it.model) + '|' + norm(it.color)) + '"><td><span class="cname"><span class="sw" style="background:' + r.ci.sw + '"></span>' +
       esc(r.ci.name) + warn + '</span></td>' + cells(s, locs) + '</tr>';
   }
 
@@ -503,6 +573,11 @@
       '<th class="g g-ord sep" colspan="2">Dealer orders</th>' +
       '<th class="g g-kits sep" colspan="' + (1 + locs.length) + '">Kits in stock (not assembled) – where they are</th>' +
       '<th class="g g-month sep" colspan="2">This month</th></tr>' +
+      '<tr class="srcrow"><th>Source</th>' +
+      '<th colspan="4"' + srcTip('stockDelivery') + '><span class="srctag sd">Stock &amp; Delivery report</span></th>' +
+      '<th class="sep" colspan="' + (1 + locs.length) + '"' + srcTip('stores') + '><span class="srctag st">Stores Vehicle Stock report</span></th>' +
+      '<th class="sep"' + srcTip('production') + '><span class="srctag pr">Production</span></th>' +
+      '<th' + srcTip('stockDelivery') + '><span class="srctag sd">Stock &amp; Delivery</span></th></tr>' +
       '<tr><th>Model / colour</th>' +
       th('sell', 'Ready to sell') + th('free', 'Free kits') +
       th('pending', 'Pending', 'sep') + th('short', 'No built stock') +
@@ -536,6 +611,14 @@
     var foot = '<tfoot><tr><td>Total' + (all.length < data.items.filter(active).length ? ' (shown)' : '') + '</td>' + cells(sum(all), locs) + '</tr></tfoot>';
     $('tableWrap').innerHTML = '<table>' + head + '<tbody>' + body + '</tbody>' + foot + '</table>';
     bindTips();
+  }
+  function srcTip(k) {
+    var s = (data.sources || {})[k] || {};
+    var txt = '<b>' + esc(SRC_SHORT[k]) + '</b>' +
+      (s.sender ? '<br>From: ' + esc(s.sender) : '') +
+      (s.fileName ? '<br>File: ' + esc(s.fileName) : '') +
+      (s.receivedAt ? '<br>' + (k === 'production' ? 'Updated: ' : 'Received: ') + esc(when(s.receivedAt)) : '');
+    return ' data-tip="' + esc(txt) + '" tabindex="0"';
   }
   function th(key, label, cls) {
     return '<th class="' + (cls || '') + '"' + tipAttr(key) + '><span class="t">' + esc(label) + '</span><i class="i">i</i></th>';
